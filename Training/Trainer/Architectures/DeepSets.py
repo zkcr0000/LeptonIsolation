@@ -107,10 +107,10 @@ class Model(BaseModel):
 
     def prep_for_forward(self, batch):
         track_info = batch["track_info"]
-        track_length = batch["track_length"]
+        track_length = batch["track_length"].cpu()
         lepton_info = batch["lepton_info"]
         calo_info = batch["calo_info"]
-        calo_length = batch["calo_length"]
+        calo_length = batch["calo_length"].cpu()
 
         # move tensors to either CPU or GPU
         track_info = track_info.to(self.device)

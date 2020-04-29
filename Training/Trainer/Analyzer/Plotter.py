@@ -94,7 +94,8 @@ class ROCPlot(object):
 
     def pTsplitPlots(self):
         """split ROC curves by lepton pT"""
-        lep_pT_boundaries = np.array([0, 10, 15, 20, 1000]) * 1000
+        #lep_pT_boundaries = np.array([0, 10, 15, 20, 1000]) * 1000
+        lep_pT_boundaries = np.array([0, 10, 15, 20]) * 1000
 
         for i in range(len(lep_pT_boundaries) - 1):
             fig = plt.figure()

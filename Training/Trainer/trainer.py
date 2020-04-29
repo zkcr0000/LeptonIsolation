@@ -78,7 +78,8 @@ class Isolation_Agent:
             print("Preprocessing test and train events")
             train_set = ROOT_Dataset(data_filename, train_event_indices, self.options)
             test_set = ROOT_Dataset(data_filename, test_event_indices, self.options)
-
+            print ("Train set pT bins: [(0,10),(10,15),(15,20),(20,1000)]: ",  train_set.lep_pT_bins)
+            print ("Test set pT bins: [(0,10),(10,15),(15,20),(20,1000)]: ",  test_set.lep_pT_bins)
             # prepare the data loaders
             print("Prepping data loaders")
             train_loader = DataLoader(
@@ -112,9 +113,9 @@ class Isolation_Agent:
         else:
             print("Unrecognized architecture type!")
             exit()
-
+	
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.model.optimizer, self.options["decay_period"], self.options["decay_rate"])
         self.train_loader, self.test_loader = _load_data(self.options["input_data"])
-
         logdir = (
             "run_"
             + time.strftime("%y-%m-%d_%H-%M-%S")
@@ -128,7 +129,6 @@ class Isolation_Agent:
             "isolator.py",
             os.path.join(self.options["run_location"], logdir + "/isolator.py"),
         )
-
         # load previous state if training is resuming
         self.resumed_epoch_n = 0
         if self.options["continue_training"] is True:
@@ -140,8 +140,9 @@ class Isolation_Agent:
             saved_agent = torch.load(self.options["model_path"])
             self.model.load_state_dict(saved_agent["model_state_dict"])
             self.model.optimizer.load_state_dict(saved_agent["optimizer_state_dict"])
+            self.scheduler = torch.optim.lr_scheduler.StepLR(self.model.optimizer, self.options["decay_period"],\
+                                                             self.options["decay_rate"], saved_agent["epoch"]-1)
             self.resumed_epoch_n = saved_agent["epoch"]
-
         # print("Model parameters:\n{}".format(self.model.parameters))
         # for name, param in self.model.named_parameters():
         # print(name, np.isnan(param.detach().cpu()).any())
@@ -184,6 +185,7 @@ class Isolation_Agent:
                     self.history_logger.add_histogram(
                         name, param.clone().cpu().data.cpu().numpy(), epoch_n
                     )
+                self.scheduler.step()
 
                 if Print:
                     print(
@@ -230,11 +232,12 @@ class Isolation_Agent:
         """saves the model and closes the TensorBoard SummaryWriter."""
         if not pathlib.Path(self.options["output_folder"]).exists():
             pathlib.Path(self.options["output_folder"]).mkdir(parents=True)
-        # self.history_logger.export_scalars_to_json(self.options["output_folder"] + "/all_scalars.json")
+        #self.history_logger.export_scalars_to_json(self.options["output_folder"] + "/all_scalars.json")
         self.history_logger.close()
 
         if self.options["save_model"]:
             print("Saving model")
+            print (self.options["model_save_path"])
             self.model.save_to_pytorch(self.options["model_save_path"])
             print("Testing saved model")
             loaded = torch.jit.load(self.options["model_save_path"])
@@ -279,7 +282,7 @@ class Isolation_Agent:
             plots = Plotter(self.options, bdt_scores, test_truth, test_lep_pT)
             ROC_figs = plots.run()
             for ROC_fig in ROC_figs:
-                self.history_logger.add_figure("BDT_" + ROC_fig.label, ROC_fig.image)
+               self.history_logger.add_figure("BDT_" + ROC_fig.label, ROC_fig.image)
 
 
 def train(options):

@@ -1,0 +1,111 @@
+number of epochs planned: 100
+input data: slice_large_data.root
+batch_size: 32
+device: cuda
+architecture: SetTransformer
+Balancing classes
+Splitting test and train events
+Preprocessing test and train events
+Train set pT bins: [(0,10),(10,15),(15,20),(20,1000)]:  [10602, 8017, 8690, 0]
+Test set pT bins: [(0,10),(10,15),(15,20),(20,1000)]:  [4560, 3429, 3716, 0]
+Prepping data loaders
+Epoch: 000, Train Loss: 0.6651, Train Acc: 0.5933, Test Loss: 0.6412, Test Acc: 0.6749
+Epoch: 001, Train Loss: 0.6351, Train Acc: 0.7530, Test Loss: 0.6270, Test Acc: 0.7705
+Epoch: 002, Train Loss: 0.6249, Train Acc: 0.7744, Test Loss: 0.6200, Test Acc: 0.7739
+Epoch: 003, Train Loss: 0.6190, Train Acc: 0.7808, Test Loss: 0.6154, Test Acc: 0.7811
+Epoch: 004, Train Loss: 0.6148, Train Acc: 0.7845, Test Loss: 0.6120, Test Acc: 0.7885
+Epoch: 005, Train Loss: 0.6116, Train Acc: 0.7887, Test Loss: 0.6092, Test Acc: 0.7902
+Epoch: 006, Train Loss: 0.6086, Train Acc: 0.7928, Test Loss: 0.6064, Test Acc: 0.7950
+Epoch: 007, Train Loss: 0.6064, Train Acc: 0.7979, Test Loss: 0.6045, Test Acc: 0.7952
+Epoch: 008, Train Loss: 0.6042, Train Acc: 0.8034, Test Loss: 0.6029, Test Acc: 0.8001
+Epoch: 009, Train Loss: 0.6022, Train Acc: 0.8070, Test Loss: 0.6011, Test Acc: 0.8029
+Epoch: 010, Train Loss: 0.6007, Train Acc: 0.8082, Test Loss: 0.5991, Test Acc: 0.8057
+Epoch: 011, Train Loss: 0.5989, Train Acc: 0.8136, Test Loss: 0.5983, Test Acc: 0.8068
+Epoch: 012, Train Loss: 0.5978, Train Acc: 0.8141, Test Loss: 0.5968, Test Acc: 0.8121
+Epoch: 013, Train Loss: 0.5964, Train Acc: 0.8191, Test Loss: 0.5958, Test Acc: 0.8121
+Epoch: 014, Train Loss: 0.5952, Train Acc: 0.8199, Test Loss: 0.5951, Test Acc: 0.8095
+Epoch: 015, Train Loss: 0.5943, Train Acc: 0.8215, Test Loss: 0.5940, Test Acc: 0.8197
+Epoch: 016, Train Loss: 0.5933, Train Acc: 0.8243, Test Loss: 0.5930, Test Acc: 0.8186
+Epoch: 017, Train Loss: 0.5928, Train Acc: 0.8241, Test Loss: 0.5925, Test Acc: 0.8219
+Epoch: 018, Train Loss: 0.5920, Train Acc: 0.8249, Test Loss: 0.5918, Test Acc: 0.8141
+Epoch: 019, Train Loss: 0.5916, Train Acc: 0.8258, Test Loss: 0.5911, Test Acc: 0.8189
+Epoch: 020, Train Loss: 0.5906, Train Acc: 0.8283, Test Loss: 0.5906, Test Acc: 0.8172
+Epoch: 021, Train Loss: 0.5902, Train Acc: 0.8283, Test Loss: 0.5904, Test Acc: 0.8215
+Epoch: 022, Train Loss: 0.5897, Train Acc: 0.8293, Test Loss: 0.5890, Test Acc: 0.8208
+Epoch: 023, Train Loss: 0.5892, Train Acc: 0.8288, Test Loss: 0.5889, Test Acc: 0.8243
+Epoch: 024, Train Loss: 0.5888, Train Acc: 0.8289, Test Loss: 0.5885, Test Acc: 0.8245
+Epoch: 025, Train Loss: 0.5880, Train Acc: 0.8319, Test Loss: 0.5884, Test Acc: 0.8237
+Epoch: 026, Train Loss: 0.5877, Train Acc: 0.8303, Test Loss: 0.5880, Test Acc: 0.8247
+Epoch: 027, Train Loss: 0.5874, Train Acc: 0.8319, Test Loss: 0.5877, Test Acc: 0.8267
+Epoch: 028, Train Loss: 0.5870, Train Acc: 0.8311, Test Loss: 0.5876, Test Acc: 0.8231
+Epoch: 029, Train Loss: 0.5868, Train Acc: 0.8330, Test Loss: 0.5869, Test Acc: 0.8252
+Epoch: 030, Train Loss: 0.5863, Train Acc: 0.8328, Test Loss: 0.5867, Test Acc: 0.8259
+Epoch: 031, Train Loss: 0.5862, Train Acc: 0.8320, Test Loss: 0.5864, Test Acc: 0.8254
+Epoch: 032, Train Loss: 0.5859, Train Acc: 0.8324, Test Loss: 0.5861, Test Acc: 0.8258
+Epoch: 033, Train Loss: 0.5854, Train Acc: 0.8342, Test Loss: 0.5857, Test Acc: 0.8220
+Epoch: 034, Train Loss: 0.5854, Train Acc: 0.8336, Test Loss: 0.5857, Test Acc: 0.8273
+Epoch: 035, Train Loss: 0.5854, Train Acc: 0.8323, Test Loss: 0.5853, Test Acc: 0.8281
+Epoch: 036, Train Loss: 0.5848, Train Acc: 0.8328, Test Loss: 0.5853, Test Acc: 0.8260
+Epoch: 037, Train Loss: 0.5845, Train Acc: 0.8344, Test Loss: 0.5851, Test Acc: 0.8253
+Epoch: 038, Train Loss: 0.5846, Train Acc: 0.8348, Test Loss: 0.5847, Test Acc: 0.8273
+Epoch: 039, Train Loss: 0.5844, Train Acc: 0.8337, Test Loss: 0.5849, Test Acc: 0.8261
+Epoch: 040, Train Loss: 0.5839, Train Acc: 0.8351, Test Loss: 0.5847, Test Acc: 0.8243
+Epoch: 041, Train Loss: 0.5839, Train Acc: 0.8346, Test Loss: 0.5844, Test Acc: 0.8249
+Epoch: 042, Train Loss: 0.5839, Train Acc: 0.8336, Test Loss: 0.5843, Test Acc: 0.8269
+Epoch: 043, Train Loss: 0.5835, Train Acc: 0.8345, Test Loss: 0.5842, Test Acc: 0.8267
+Epoch: 044, Train Loss: 0.5835, Train Acc: 0.8355, Test Loss: 0.5844, Test Acc: 0.8212
+Epoch: 045, Train Loss: 0.5831, Train Acc: 0.8346, Test Loss: 0.5843, Test Acc: 0.8216
+Epoch: 046, Train Loss: 0.5832, Train Acc: 0.8340, Test Loss: 0.5836, Test Acc: 0.8300
+Epoch: 047, Train Loss: 0.5831, Train Acc: 0.8339, Test Loss: 0.5829, Test Acc: 0.8285
+Epoch: 048, Train Loss: 0.5827, Train Acc: 0.8358, Test Loss: 0.5833, Test Acc: 0.8302
+Epoch: 049, Train Loss: 0.5825, Train Acc: 0.8346, Test Loss: 0.5834, Test Acc: 0.8273
+Epoch: 050, Train Loss: 0.5825, Train Acc: 0.8361, Test Loss: 0.5830, Test Acc: 0.8292
+Epoch: 051, Train Loss: 0.5823, Train Acc: 0.8358, Test Loss: 0.5833, Test Acc: 0.8286
+Epoch: 052, Train Loss: 0.5822, Train Acc: 0.8360, Test Loss: 0.5834, Test Acc: 0.8290
+Epoch: 053, Train Loss: 0.5824, Train Acc: 0.8356, Test Loss: 0.5832, Test Acc: 0.8249
+Epoch: 054, Train Loss: 0.5817, Train Acc: 0.8374, Test Loss: 0.5832, Test Acc: 0.8267
+Epoch: 055, Train Loss: 0.5822, Train Acc: 0.8348, Test Loss: 0.5834, Test Acc: 0.8238
+Epoch: 056, Train Loss: 0.5820, Train Acc: 0.8360, Test Loss: 0.5825, Test Acc: 0.8285
+Epoch: 057, Train Loss: 0.5819, Train Acc: 0.8363, Test Loss: 0.5825, Test Acc: 0.8320
+Epoch: 058, Train Loss: 0.5816, Train Acc: 0.8360, Test Loss: 0.5822, Test Acc: 0.8273
+Epoch: 059, Train Loss: 0.5815, Train Acc: 0.8355, Test Loss: 0.5822, Test Acc: 0.8303
+Epoch: 060, Train Loss: 0.5815, Train Acc: 0.8375, Test Loss: 0.5825, Test Acc: 0.8248
+Epoch: 061, Train Loss: 0.5811, Train Acc: 0.8375, Test Loss: 0.5817, Test Acc: 0.8275
+Epoch: 062, Train Loss: 0.5814, Train Acc: 0.8351, Test Loss: 0.5822, Test Acc: 0.8262
+Epoch: 063, Train Loss: 0.5810, Train Acc: 0.8379, Test Loss: 0.5822, Test Acc: 0.8257
+Epoch: 064, Train Loss: 0.5810, Train Acc: 0.8358, Test Loss: 0.5818, Test Acc: 0.8285
+Epoch: 065, Train Loss: 0.5813, Train Acc: 0.8368, Test Loss: 0.5822, Test Acc: 0.8257
+Epoch: 066, Train Loss: 0.5808, Train Acc: 0.8385, Test Loss: 0.5817, Test Acc: 0.8306
+Epoch: 067, Train Loss: 0.5810, Train Acc: 0.8359, Test Loss: 0.5822, Test Acc: 0.8245
+Epoch: 068, Train Loss: 0.5809, Train Acc: 0.8360, Test Loss: 0.5819, Test Acc: 0.8279
+Epoch: 069, Train Loss: 0.5804, Train Acc: 0.8384, Test Loss: 0.5814, Test Acc: 0.8267
+Epoch: 070, Train Loss: 0.5804, Train Acc: 0.8368, Test Loss: 0.5812, Test Acc: 0.8278
+Epoch: 071, Train Loss: 0.5807, Train Acc: 0.8358, Test Loss: 0.5818, Test Acc: 0.8279
+Epoch: 072, Train Loss: 0.5803, Train Acc: 0.8381, Test Loss: 0.5820, Test Acc: 0.8248
+Epoch: 073, Train Loss: 0.5806, Train Acc: 0.8353, Test Loss: 0.5815, Test Acc: 0.8282
+Epoch: 074, Train Loss: 0.5802, Train Acc: 0.8380, Test Loss: 0.5811, Test Acc: 0.8287
+Epoch: 075, Train Loss: 0.5800, Train Acc: 0.8379, Test Loss: 0.5809, Test Acc: 0.8289
+Epoch: 076, Train Loss: 0.5804, Train Acc: 0.8362, Test Loss: 0.5812, Test Acc: 0.8255
+Epoch: 077, Train Loss: 0.5801, Train Acc: 0.8370, Test Loss: 0.5814, Test Acc: 0.8281
+Epoch: 078, Train Loss: 0.5800, Train Acc: 0.8377, Test Loss: 0.5813, Test Acc: 0.8254
+Epoch: 079, Train Loss: 0.5801, Train Acc: 0.8381, Test Loss: 0.5817, Test Acc: 0.8267
+Epoch: 080, Train Loss: 0.5800, Train Acc: 0.8372, Test Loss: 0.5807, Test Acc: 0.8319
+Epoch: 081, Train Loss: 0.5800, Train Acc: 0.8373, Test Loss: 0.5808, Test Acc: 0.8292
+Epoch: 082, Train Loss: 0.5800, Train Acc: 0.8365, Test Loss: 0.5808, Test Acc: 0.8272
+Epoch: 083, Train Loss: 0.5798, Train Acc: 0.8377, Test Loss: 0.5809, Test Acc: 0.8245
+Epoch: 084, Train Loss: 0.5801, Train Acc: 0.8366, Test Loss: 0.5806, Test Acc: 0.8260
+Epoch: 085, Train Loss: 0.5802, Train Acc: 0.8360, Test Loss: 0.5809, Test Acc: 0.8266
+Epoch: 086, Train Loss: 0.5798, Train Acc: 0.8367, Test Loss: 0.5810, Test Acc: 0.8306
+Epoch: 087, Train Loss: 0.5797, Train Acc: 0.8377, Test Loss: 0.5807, Test Acc: 0.8265
+Epoch: 088, Train Loss: 0.5797, Train Acc: 0.8368, Test Loss: 0.5812, Test Acc: 0.8292
+Epoch: 089, Train Loss: 0.5796, Train Acc: 0.8371, Test Loss: 0.5807, Test Acc: 0.8266
+Epoch: 090, Train Loss: 0.5794, Train Acc: 0.8388, Test Loss: 0.5809, Test Acc: 0.8311
+Epoch: 091, Train Loss: 0.5794, Train Acc: 0.8372, Test Loss: 0.5804, Test Acc: 0.8291
+Epoch: 092, Train Loss: 0.5794, Train Acc: 0.8382, Test Loss: 0.5805, Test Acc: 0.8290
+Epoch: 093, Train Loss: 0.5796, Train Acc: 0.8369, Test Loss: 0.5811, Test Acc: 0.8257
+Epoch: 094, Train Loss: 0.5790, Train Acc: 0.8382, Test Loss: 0.5803, Test Acc: 0.8283
+Epoch: 095, Train Loss: 0.5793, Train Acc: 0.8370, Test Loss: 0.5809, Test Acc: 0.8288
+Epoch: 096, Train Loss: 0.5789, Train Acc: 0.8388, Test Loss: 0.5807, Test Acc: 0.8269
+Epoch: 097, Train Loss: 0.5790, Train Acc: 0.8381, Test Loss: 0.5805, Test Acc: 0.8299
+Epoch: 098, Train Loss: 0.5794, Train Acc: 0.8373, Test Loss: 0.5805, Test Acc: 0.8271
+Epoch: 099, Train Loss: 0.5790, Train Acc: 0.8377, Test Loss: 0.5816, Test Acc: 0.8309

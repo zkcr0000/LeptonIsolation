@@ -29,7 +29,7 @@ class ROOT_Dataset(Dataset):
         self.event_order = readable_event_indices
         if shuffle_indices:
             random.shuffle(self.event_order)
-        self.data_tree = self._store_tree_in_memory(
+        self.data_tree, self.lep_pT_bins = self._store_tree_in_memory(
             self.data_tree_on_disk, self.event_order, self.options
         )
 
@@ -66,6 +66,7 @@ class ROOT_Dataset(Dataset):
             return tracks
 
         tree_info = []
+        lep_PT_count = [0,0,0,0]
         for index in event_order:
             tree.GetEntry(index)
             n_calo_clusters = len(list(getattr(tree, options["calo_features"][0])))
@@ -95,10 +96,18 @@ class ROOT_Dataset(Dataset):
             truth = torch.Tensor(
                 [int(truth) in [2, 6]]
             )  # 'truth_type': 2/6=prompt; 3/7=HF
+            lep_pT_value = getattr(tree,"ROC_slicing_lep_pT")
+            if (lep_pT_value < 10.0*1000):
+                lep_PT_count[0]+=1
+            if (lep_pT_value < 15.0*1000 and lep_pT_value>=10.0*1000):
+                lep_PT_count[1] +=1              
+            if (lep_pT_value < 20.0*1000 and lep_pT_value>=15.0*1000):
+                lep_PT_count[2] +=1              
+            if (lep_pT_value < 1000.0*1000 and lep_pT_value>=20.0*1000):
+                lep_PT_count[3] +=1              
             lep_pT = torch.Tensor([getattr(tree, "ROC_slicing_lep_pT")])
             baseline_PLT = torch.Tensor([getattr(tree, "baseline_PLT")])
             tree_info.append((lepton, tracks, clusters, truth, lep_pT, baseline_PLT))
-
         n_additional_features = len(options["additional_appended_features"])
         n_natural_lep_features = len(options["lep_features"]) - n_additional_features
         if n_additional_features > 0:
@@ -122,7 +131,7 @@ class ROOT_Dataset(Dataset):
                 for i in tree_info
             ]
 
-        return tree_info
+        return tree_info, lep_PT_count
 
     def __getitem__(self, index):
         """Returns the data at a given index."""

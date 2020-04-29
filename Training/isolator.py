@@ -35,22 +35,25 @@ if __name__ == "__main__":
 
     options = {}
 
-    options["input_data"] = "/public/data/RNN/Samples/InclusivePt/small_data.root"
+    options["input_data"] = "/public/data/RNN/Samples/InclusivePt/large_data.root"
+    #options["input_data"] = "/home/cunweifan/data/slice_small_data.root"  #"/public/data/RNN/Samples/InclusivePt/large_data.root"
     assert path.exists(options["input_data"]) is True, "invalid input_data path"
-    options["run_location"] = "/public/data/RNN/runs"
-    options["run_label"] = "anil_test"
+    options["run_location"] = "/home/cunweifan/runs"
+    options["run_label"] = "SetTransformer_large_data"
     options["tree_name"] = "NormalizedTree"
     options["output_folder"] = "./Outputs/"
     options["model_path"] = options["output_folder"] + "saved_model.pt"
     options["continue_training"] = args.continue_training
-    options["architecture_type"] = "GRU"  # RNN, LSTM, GRU, DeepSets, SetTransformer
+    options["architecture_type"] = "SetTransformer"  # RNN, LSTM, GRU, DeepSets, SetTransformer
     options["dropout"] = 0.3
     options[
         "track_ordering"
     ] = "low-to-high-pt"  # None, "high-to-low-pt", "low-to-high-pt", "near-to-far", "far-to-near"
     # options["additional_appended_features"] = ["baseline_topoetcone20", "baseline_topoetcone30", "baseline_topoetcone40", "baseline_eflowcone20", "baseline_ptcone20", "baseline_ptcone30", "baseline_ptcone40", "baseline_ptvarcone20", "baseline_ptvarcone30", "baseline_ptvarcone40"]
     options["additional_appended_features"] = []
-    options["lr"] = 0.001
+    options["lr"] = 0.001   #0.001
+    options["decay_period"] = 30
+    options["decay_rate"] = 0.1
     options["ignore_features"] = [
         "baseline_topoetcone20",
         "baseline_topoetcone30",
@@ -67,7 +70,7 @@ if __name__ == "__main__":
     ]
     options["training_split"] = 0.7
     options["batch_size"] = 32
-    options["n_epochs"] = 10
+    options["n_epochs"] = 100
     options["n_layers"] = 3
     options["hidden_neurons"] = 256
     options["intrinsic_dimensions"] = 1024  # only matters for deep sets

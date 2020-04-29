@@ -43,7 +43,8 @@ class BaseModel(torch.jit.ScriptModule):
     ]
 
     def __init__(self, options):
-        super().__init__(options)
+        #super(BaseModel,self).__init__()#options)
+        super().__init__()
         self.n_trk_features = options["n_trk_features"]
         self.n_calo_features = options["n_calo_features"]
         self.hidden_size = options["hidden_neurons"]
@@ -97,6 +98,7 @@ class BaseModel(torch.jit.ScriptModule):
             self.optimizer.zero_grad()
             input_batch = self.prep_for_forward(batch)
             output = self.forward(*input_batch)
+            #output = self.forward(input_batch) #TODO for DeepSets Only
             truth = batch["truth"].to(self.device)
             output = output[:, 0]
             loss = self.loss_function(output, truth.float())
@@ -151,4 +153,5 @@ class BaseModel(torch.jit.ScriptModule):
 
     def save_to_pytorch(self, output_path):
         self.eval()
-        torch.jit.save(self, output_path)
+        #self.save(output_path)
+        torch.jit.save(self,output_path)
