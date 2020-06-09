@@ -64,6 +64,18 @@ int main (int argc, char *argv[]) {
     float ptcone20; unnormedTree->Branch("baseline_ptcone20", &ptcone20, "baseline_ptcone20/F");
     float ptcone30; unnormedTree->Branch("baseline_ptcone30", &ptcone30, "baseline_ptcone30/F");
     float ptcone40; unnormedTree->Branch("baseline_ptcone40", &ptcone40, "baseline_ptcone40/F");
+
+    float calc_ptcone20; unnormedTree->Branch("calc_ptcone20", &calc_ptcone20, "calc_ptcone20/F");
+    float calc_ptcone30; unnormedTree->Branch("calc_ptcone30", &calc_ptcone30, "calc_ptcone30/F");
+    float calc_ptcone40; unnormedTree->Branch("calc_ptcone40", &calc_ptcone40, "calc_ptcone40/F");
+    float calc_topoetcone20; unnormedTree->Branch("calc_topoetcone20", &calc_topoetcone20, "calc_topoetcone20/F");
+    float calc_topoetcone30; unnormedTree->Branch("calc_topoetcone20", &calc_topoetcone30, "calc_topoetcone30/F");
+    float calc_topoetcone40; unnormedTree->Branch("calc_topoetcone40", &calc_topoetcone40, "calc_topoetcone40/F");
+    
+    float calc_ptvarcone20; unnormedTree->Branch("calc_ptvarcone20", &calc_ptvarcone20, "calc_ptvarcone20/F");
+    float calc_ptvarcone30; unnormedTree->Branch("calc_ptvarcone30", &calc_ptvarcone30, "calc_ptvarcone30/F");
+    float calc_ptvarcone40; unnormedTree->Branch("calc_ptvarcone40", &calc_ptvarcone40, "calc_ptvarcone40/F");
+    
     float ptvarcone20; unnormedTree->Branch("baseline_ptvarcone20", &ptvarcone20, "baseline_ptvarcone20/F");
     float ptvarcone30; unnormedTree->Branch("baseline_ptvarcone30", &ptvarcone30, "baseline_ptvarcone30/F");
     float ptvarcone40; unnormedTree->Branch("baseline_ptvarcone40", &ptvarcone40, "baseline_ptvarcone40/F");
@@ -155,7 +167,7 @@ int main (int argc, char *argv[]) {
     };
 
     //--- Accessors
-    SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
+   // SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
 
     std::string FlvTagCutDefinitionsFileName = "/eos/atlas/atlascerngroupdisk/asg-calib/xAODBTaggingEfficiency/13TeV/2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
     std::string WP = "FixedCutBEff_77";
@@ -212,7 +224,7 @@ int main (int argc, char *argv[]) {
         lep_d0_over_sigd0 = xAOD::TrackingHelpers::d0significance(track_particle);
         lep_z0 = track_particle->z0();
         lep_dz0 = track_particle->z0() - primary_vertex->z();
-        PLT = accessPromptVar(*lepton);
+       // PLT = accessPromptVar(*lepton);
         if (is_electron) process_electron_cones((const xAOD::Electron*)lepton);
         else process_muon_cones((const xAOD::Muon*)lepton);
 
@@ -280,7 +292,66 @@ int main (int argc, char *argv[]) {
         set<const xAOD::TrackParticle*> own_tracks;
         if (is_electron) own_tracks = get_electron_own_tracks((const xAOD::Electron*)lepton);
         else own_tracks = get_muon_own_tracks((const xAOD::Muon*)lepton);
-
+        if( is_electron) {      
+ calc_ptcone20 = 0; calc_ptcone30 = 0; calc_ptcone40 = 0; calc_ptvarcone20 = 0; calc_ptvarcone30 = 0; calc_ptvarcone40 = 0;
+float var_R_20 = std::min(10e3/lepton->pt(), 0.20); float var_R_30 = std::min(10e3/lepton->pt(), 0.30); float var_R_40 = std::min(10e3/lepton->pt(), 0.40);
+std::set<const xAOD::TrackParticle*> electron_tracks = xAOD::EgammaHelpers::getTrackParticles((const xAOD::Egamma*)lepton, true);
+	for (auto trk : filtered_tracks) {
+	    if (!trk) continue;
+	    bool matches_own_track = false;
+	    for (auto own_track : electron_tracks)
+	        if (trk == own_track) matches_own_track = true;
+	    if (matches_own_track) continue;
+	    if (trk->vertex() && trk->vertex()!=primary_vertex) continue;
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.20) calc_ptcone20 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.30) calc_ptcone30 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.40) calc_ptcone40 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_20) calc_ptvarcone20 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
+	}
+}
+/*
+	calc_topoetcone20 = 0; calc_topoetcone30 = 0; calc_topoetcone40 = 0;
+	const xAOD::CaloCluster *egclus = this->m_current_electrons.at(idx)->caloCluster();
+	for (const auto& clus : *calo_clusters) {
+	    if (clus->e()<0) continue;
+	    if (egclus->p4().DeltaR(clus->p4()) < 0.2) calc_etcone20 += clus->et();
+	    if (egclus->p4().DeltaR(clus->p4()) < 0.3) calc_etcone30 += clus->et();
+	    if (egclus->p4().DeltaR(clus->p4()) < 0.4) calc_e
+	}
+*/	
+	// muon
+	else{
+	calc_ptcone20 = 0; calc_ptcone30 = 0; calc_ptcone40 = 0; calc_ptvarcone20 = 0; calc_ptvarcone30 = 0; calc_ptvarcone40 = 0;
+	float var_R_20 = std::min(10e3/lepton->pt(), 0.20); float var_R_30 = std::min(10e3/lepton->pt(), 0.30); float var_R_40 = std::min(10e3/lepton->pt(), 0.40);
+xAOD::Muon::TrackParticleType type = xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle;
+	const xAOD::Muon* this_muon = (const xAOD::Muon*) lepton;
+	auto own_track = this_muon->trackParticle(type);
+	for (auto trk : filtered_tracks) {
+	    if (!trk) continue;
+	    if (trk == own_track) continue;
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.20) calc_ptcone20 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.30) calc_ptcone30 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < 0.40) calc_ptcone40 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_20) calc_ptvarcone20 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
+	    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
+	}
+}
+/*
+	calc_topoetcone20 = 0; calc_topoetcone30 = 0; calc_topoetcone40 = 0;
+	std::vector<fastjet::PseudoJet> input_clus;
+	for (const auto& cluster : *calo_clusters) {
+	    if (!cluster) continue;
+	    if (cluster->e()<0) continue;
+	    float dR = cluster->p4().DeltaR(muon->p4());
+	    if (dR < 0.2 && dR > 0.05) calc_etcone20 += cluster->et();
+	    if (dR < 0.3 && dR > 0.05) calc_etcone30 += cluster->et();
+	    if (dR < 0.4 && dR > 0.05) calc_etcone40 += cluster->et();
+	}
+*/	         
+	
         bool has_associated_tracks = false;
         for (auto track : filtered_tracks) {
             if (!track->vertex() or track->vertex()!=primary_vertex) continue;
