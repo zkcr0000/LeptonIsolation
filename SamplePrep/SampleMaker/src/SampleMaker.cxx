@@ -28,6 +28,7 @@
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
 
 using namespace std;
 
@@ -79,16 +80,24 @@ int main (int argc, char *argv[]) {
     float ptvarcone20; unnormedTree->Branch("baseline_ptvarcone20", &ptvarcone20, "baseline_ptvarcone20/F");
     float ptvarcone30; unnormedTree->Branch("baseline_ptvarcone30", &ptvarcone30, "baseline_ptvarcone30/F");
     float ptvarcone40; unnormedTree->Branch("baseline_ptvarcone40", &ptvarcone40, "baseline_ptvarcone40/F");
+
     float topoetcone20; unnormedTree->Branch("baseline_topoetcone20", &topoetcone20, "baseline_topoetcone20/F");
     float topoetcone30; unnormedTree->Branch("baseline_topoetcone30", &topoetcone30, "baseline_topoetcone30/F");
     float topoetcone40; unnormedTree->Branch("baseline_topoetcone40", &topoetcone40, "baseline_topoetcone40/F");
+
+    float etcone20; unnormedTree->Branch("baseline_etcone20", &etcone20, "baseline_etcone20/F");
+    float etcone30; unnormedTree->Branch("baseline_etcone30", &etcone30, "baseline_etcone30/F");
+    float etcone40; unnormedTree->Branch("baseline_etcone40", &etcone40, "baseline_etcone40/F");
+
     float eflowcone20; unnormedTree->Branch("baseline_eflowcone20", &eflowcone20, "baseline_eflowcone20/F");
     float ptcone20_over_pt; unnormedTree->Branch("baseline_ptcone20_over_pt", &ptcone20_over_pt, "baseline_ptcone20_over_pt/F");
     float ptcone30_over_pt; unnormedTree->Branch("baseline_ptcone30_over_pt", &ptcone30_over_pt, "baseline_ptcone30_over_pt/F");
     float ptcone40_over_pt; unnormedTree->Branch("baseline_ptcone40_over_pt", &ptcone40_over_pt, "baseline_ptcone40_over_pt/F");
+
     float ptvarcone20_over_pt; unnormedTree->Branch("baseline_ptvarcone20_over_pt", &ptvarcone20_over_pt, "baseline_ptvarcone20_over_pt/F");
     float ptvarcone30_over_pt; unnormedTree->Branch("baseline_ptvarcone30_over_pt", &ptvarcone30_over_pt, "baseline_ptvarcone30_over_pt/F");
     float ptvarcone40_over_pt; unnormedTree->Branch("baseline_ptvarcone40_over_pt", &ptvarcone40_over_pt, "baseline_ptvarcone40_over_pt/F");
+
     float topoetcone20_over_pt; unnormedTree->Branch("baseline_topoetcone20_over_pt", &topoetcone20_over_pt, "baseline_topoetcone20_over_pt/F");
     float topoetcone30_over_pt; unnormedTree->Branch("baseline_topoetcone30_over_pt", &topoetcone30_over_pt, "baseline_topoetcone30_over_pt/F");
     float topoetcone40_over_pt; unnormedTree->Branch("baseline_topoetcone40_over_pt", &topoetcone40_over_pt, "baseline_topoetcone40_over_pt/F");
@@ -195,6 +204,11 @@ int main (int argc, char *argv[]) {
             electron->isolation(ptvarcone20,xAOD::Iso::ptvarcone20);
             electron->isolation(ptvarcone30,xAOD::Iso::ptvarcone30_TightTTVA_pt1000);
             electron->isolation(ptvarcone40,xAOD::Iso::ptvarcone40);
+
+            electron->isolation(etcone20,xAOD::Iso::etcone20);
+            electron->isolation(etcone30,xAOD::Iso::etcone30);
+            electron->isolation(etcone40,xAOD::Iso::etcone40);
+
             electron->isolation(topoetcone20,xAOD::Iso::topoetcone20);
             topoetcone30 = numeric_limits<float>::quiet_NaN();
             electron->isolation(topoetcone40,xAOD::Iso::topoetcone40);
@@ -209,6 +223,11 @@ int main (int argc, char *argv[]) {
             muon->isolation(ptvarcone20,xAOD::Iso::ptvarcone20);
             muon->isolation(ptvarcone30,xAOD::Iso::ptvarcone30);
             muon->isolation(ptvarcone40,xAOD::Iso::ptvarcone40);
+
+            muon->isolation(etcone20,xAOD::Iso::etcone20);
+            muon->isolation(etcone30,xAOD::Iso::etcone30);
+            muon->isolation(etcone40,xAOD::Iso::etcone40);
+
             muon->isolation(topoetcone20,xAOD::Iso::topoetcone20);
             muon->isolation(topoetcone30,xAOD::Iso::topoetcone30);
             muon->isolation(topoetcone40,xAOD::Iso::topoetcone40);
