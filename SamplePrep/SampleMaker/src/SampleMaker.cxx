@@ -91,6 +91,14 @@ int main (int argc, char *argv[]) {
     float calc_ptvarcone40; unnormedTree->Branch("calc_ptvarcone40", &calc_ptvarcone40, "calc_ptvarcone40/F");
 
 
+	float etcone20; unnormedTree->Branch("baseline_etcone20", &etcone20, "baseline_etcone20/F");
+    float etcone30; unnormedTree->Branch("baseline_etcone30", &etcone30, "baseline_etcone30/F");
+    float etcone40; unnormedTree->Branch("baseline_etcone40", &etcone40, "baseline_etcone40/F");
+
+	float calc_etcone20; unnormedTree->Branch("calc_etcone20", &calc_etcone20, "calc_etcone20/F");
+    float calc_etcone30; unnormedTree->Branch("calc_etcone30", &calc_etcone30, "calc_etcone30/F");
+    float calc_etcone40; unnormedTree->Branch("calc_etcone40", &calc_etcone40, "calc_etcone40/F");
+
 
     float lep_pT; unnormedTree->Branch("lep_pT", &lep_pT, "lep_pT/F");
     unnormedTree->Branch("ROC_slicing_lep_pT", &lep_pT, "ROC_slicing_lep_pT/F");  // for making ROC curve plots
@@ -193,6 +201,11 @@ int main (int argc, char *argv[]) {
             electron->isolation(ptvarcone30,xAOD::Iso::ptvarcone30_TightTTVA_pt1000);
             electron->isolation(ptvarcone40,xAOD::Iso::ptvarcone40);
             electron->isolation(topoetcone20,xAOD::Iso::topoetcone20);
+			
+			electron->isolation(etcone20,xAOD::Iso::etcone20);
+            electron->isolation(etcone30,xAOD::Iso::etcone30);
+            electron->isolation(etcone40,xAOD::Iso::etcone40);
+
             topoetcone30 = numeric_limits<float>::quiet_NaN();
             electron->isolation(topoetcone40,xAOD::Iso::topoetcone40);
             electron->isolation(eflowcone20,xAOD::Iso::neflowisol20);
@@ -206,6 +219,11 @@ int main (int argc, char *argv[]) {
             muon->isolation(ptvarcone20,xAOD::Iso::ptvarcone20);
             muon->isolation(ptvarcone30,xAOD::Iso::ptvarcone30);
             muon->isolation(ptvarcone40,xAOD::Iso::ptvarcone40);
+			
+			muon->isolation(etcone20,xAOD::Iso::etcone20);
+            muon->isolation(etcone30,xAOD::Iso::etcone30);
+            muon->isolation(etcone40,xAOD::Iso::etcone40);
+
             muon->isolation(topoetcone20,xAOD::Iso::topoetcone20);
             muon->isolation(topoetcone30,xAOD::Iso::topoetcone30);
             muon->isolation(topoetcone40,xAOD::Iso::topoetcone40);
@@ -291,6 +309,7 @@ int main (int argc, char *argv[]) {
         else own_tracks = get_muon_own_tracks((const xAOD::Muon*)lepton);
 		
 		calc_ptcone20 = 0; calc_ptcone30 = 0; calc_ptcone40 = 0; calc_ptvarcone20 = 0; calc_ptvarcone30 = 0; calc_ptvarcone40 = 0;
+	 	calc_etcone20 = 0; calc_etcone30 = 0; calc_etcone40 = 0;
 		float var_R_20 = std::min(10e3/lepton->pt(), 0.20); 
 		float var_R_30 = std::min(10e3/lepton->pt(), 0.30); 
 		float var_R_40 = std::min(10e3/lepton->pt(), 0.40);
@@ -311,7 +330,25 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
+			float coreV = 0;
+            ((const xAOD::Egamma*) lepton)->isolationCaloCorrection(coreV, xAOD::Iso::etcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
+			const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
+			int n = 0;
+			for (const auto& clus: filtered_calo_clusters){
+				cout<<"cluster: "<< n++<<endl;
+				if (!clus) continue;
+				if (clus->e()<0) continue;
+				float dR = egclus->p4().DeltaR(clus->p4()) ;		
+				if (dR < 0.2) calc_etcone20 += clus->et(); 
+				if (dR < 0.3) calc_etcone30 += clus->et(); 
+				if (dR < 0.4) calc_etcone40 += clus->et(); 
+			}
+			calc_etcone20 -= coreV ; calc_etcone20 = (calc_etcone20 < 0 ? 0 : calc_etcone20); 
+			calc_etcone30 -= coreV ; calc_etcone30 = (calc_etcone30 < 0 ? 0 : calc_etcone30); 
+			calc_etcone40 -= coreV ; calc_etcone40 = (calc_etcone40 < 0 ? 0 : calc_etcone40); 
+
 		}else{
+			
 			xAOD::Muon::TrackParticleType type = xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle;
 			auto own_track = ((xAOD::Muon*)lepton)->trackParticle(type);
 			for (auto trk : filtered_tracks) {
@@ -323,6 +360,14 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_20) calc_ptvarcone20 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
+			}
+			for (const auto& clus: filtered_calo_clusters){
+				if (!clus) continue;
+				if (clus->e()<0) continue;
+				float dR = clus->p4().DeltaR(lepton->p4());
+	    		if (dR < 0.2 && dR > 0.05) calc_etcone20 += clus->et();
+	    		if (dR < 0.3 && dR > 0.05) calc_etcone30 += clus->et();
+	    		if (dR < 0.4 && dR > 0.05) calc_etcone40 += clus->et();
 			}
 
 		}
@@ -412,7 +457,7 @@ int main (int argc, char *argv[]) {
 
     for (entry_n = 0; entry_n < entries; ++entry_n) {
         //--- Get event
-        if (entry_n%500 == 0) cout << "Processing event " << entry_n << "/" << entries << "\n";
+        if (entry_n%2 == 0) cout << "Processing event " << entry_n << "/" << entries << "\n";
         event.getEntry(entry_n);
 
         //--- Get event objects

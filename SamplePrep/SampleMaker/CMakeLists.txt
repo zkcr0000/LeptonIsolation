@@ -2,6 +2,7 @@ cmake_minimum_required( VERSION 3.2 FATAL_ERROR )
 
 # get analysis base
 find_package( AnalysisBase 21.2 REQUIRED )
+#find_package(AthDerivation REQUIRED) 
 
 # set up a work directory project:
 atlas_project( WorkDir 1.0 USE AnalysisBase ${AnalysisBase_VERSION} )
@@ -21,10 +22,13 @@ atlas_subdir( RNNSampleMaker )
   ##InnerDetector/InDetRecTools/InDetTrackSelectionTool
 #)
 
+
 # external(s) used by the package:
 find_package(ROOT REQUIRED COMPONENTS RIO Hist Tree Net Core)
 find_package(HDF5 1.10.1 REQUIRED COMPONENTS CXX C)
+#find_package(Calorimeter REQUIRED PATHS "/cvmfs/atlas.cern.ch/repo/sw/software/21.2/AthDerivation/21.2.97.0/InstallArea/x86_64-slc6-gcc62-opt/src/Calorimeter" ) 
 find_package(lwtnn)
+
 
 # common requirements
 set(_common
@@ -48,8 +52,9 @@ set(_common
   xAODJet
 )
 
+
 # build the test executable:
-atlas_add_executable( SampleMaker src/SampleMaker.cxx ${_common} )
+atlas_add_executable( SampleMaker src/SampleMaker.cxx ${_common})
 
 # Set up grid magic. Atlas uses CPack to package up the local files
 # and submit them to the grid. If you're not looking to run on the
