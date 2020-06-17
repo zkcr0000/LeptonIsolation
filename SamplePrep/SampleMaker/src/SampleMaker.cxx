@@ -174,7 +174,6 @@ int main (int argc, char *argv[]) {
     //--- Accessors
     //SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
 
-
     std::string FlvTagCutDefinitionsFileName = "/eos/atlas/atlascerngroupdisk/asg-calib/xAODBTaggingEfficiency/13TeV/2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
     std::string WP = "FixedCutBEff_77";
     BTaggingSelectionTool *m_bTagSel_DL1r = new BTaggingSelectionTool("BTagSel_DL1r");
@@ -331,22 +330,22 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			float coreV = 0;
-            ((const xAOD::Egamma*) lepton)->isolationCaloCorrection(coreV, xAOD::Iso::etcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
-			const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
-			int n = 0;
-			for (const auto& clus: filtered_calo_clusters){
-				cout<<"cluster: "<< n++<<endl;
-				if (!clus) continue;
-				if (clus->e()<0) continue;
-				float dR = egclus->p4().DeltaR(clus->p4()) ;		
-				if (dR < 0.2) calc_etcone20 += clus->et(); 
-				if (dR < 0.3) calc_etcone30 += clus->et(); 
-				if (dR < 0.4) calc_etcone40 += clus->et(); 
-			}
-			calc_etcone20 -= coreV ; calc_etcone20 = (calc_etcone20 < 0 ? 0 : calc_etcone20); 
-			calc_etcone30 -= coreV ; calc_etcone30 = (calc_etcone30 < 0 ? 0 : calc_etcone30); 
-			calc_etcone40 -= coreV ; calc_etcone40 = (calc_etcone40 < 0 ? 0 : calc_etcone40); 
+			//float coreV = 0;
+            //((const xAOD::Egamma*) lepton)->isolationCaloCorrection(coreV, xAOD::Iso::etcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
+			//const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
+			//int n = 0;
+			//for (const auto& clus: filtered_calo_clusters){
+			//	cout<<"cluster: "<< n++<<endl;
+			//	if (!clus) continue;
+			//	if (clus->e()<0) continue;
+			//	float dR = egclus->p4().DeltaR(clus->p4()) ;		
+			//	if (dR < 0.2) calc_etcone20 += clus->et(); 
+			//	if (dR < 0.3) calc_etcone30 += clus->et(); 
+			//	if (dR < 0.4) calc_etcone40 += clus->et(); 
+			//}
+			//calc_etcone20 -= coreV ; calc_etcone20 = (calc_etcone20 < 0 ? 0 : calc_etcone20); 
+			//calc_etcone30 -= coreV ; calc_etcone30 = (calc_etcone30 < 0 ? 0 : calc_etcone30); 
+			//calc_etcone40 -= coreV ; calc_etcone40 = (calc_etcone40 < 0 ? 0 : calc_etcone40); 
 
 		}else{
 			
@@ -362,14 +361,14 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			for (const auto& clus: filtered_calo_clusters){
-				if (!clus) continue;
-				if (clus->e()<0) continue;
-				float dR = clus->p4().DeltaR(lepton->p4());
-	    		if (dR < 0.2 && dR > 0.05) calc_etcone20 += clus->et();
-	    		if (dR < 0.3 && dR > 0.05) calc_etcone30 += clus->et();
-	    		if (dR < 0.4 && dR > 0.05) calc_etcone40 += clus->et();
-			}
+			//for (const auto& clus: filtered_calo_clusters){
+			//	if (!clus) continue;
+			//	if (clus->e()<0) continue;
+			//	float dR = clus->p4().DeltaR(lepton->p4());
+	    	//	if (dR < 0.2 && dR > 0.05) calc_etcone20 += clus->et();
+	    	//	if (dR < 0.3 && dR > 0.05) calc_etcone30 += clus->et();
+	    	//	if (dR < 0.4 && dR > 0.05) calc_etcone40 += clus->et();
+			//}
 
 		}
 
