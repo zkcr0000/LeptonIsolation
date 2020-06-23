@@ -25,6 +25,15 @@
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 
+#include "xAODPrimitives/IsolationConeSize.h"
+#include "xAODPrimitives/IsolationFlavour.h"
+#include "xAODPrimitives/IsolationCorrection.h"
+#include "xAODPrimitives/IsolationHelpers.h"
+#include "xAODPrimitives/IsolationCorrectionHelper.h"
+#include "xAODPrimitives/tools/getIsolationAccessor.h"
+#include "xAODPrimitives/tools/getIsolationCorrectionAccessor.h"
+#include "xAODEventShape/EventShape.h"
+
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
@@ -186,7 +195,7 @@ int main (int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
 
-    auto process_lepton = [&] (const xAOD::IParticle* lepton, const xAOD::Vertex *primary_vertex, const vector<const xAOD::TrackParticle*> &filtered_tracks, vector<const xAOD::CaloCluster*> &filtered_calo_clusters, vector<const xAOD::Jet*> &filtered_jets, bool is_electron) {
+    auto process_lepton = [&] (const xAOD::IParticle* lepton, const xAOD::Vertex *primary_vertex, const vector<const xAOD::TrackParticle*> &filtered_tracks, vector<const xAOD::CaloCluster*> &filtered_calo_clusters, vector<const xAOD::Jet*> &filtered_jets, double rho_central, double rho_forward,  bool is_electron) {
         //--- Get lepton's associated track particle
         const xAOD::TrackParticle* track_particle; 
         if (is_electron) track_particle = ((xAOD::Electron*)lepton)->trackParticle(); 
@@ -330,22 +339,36 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			//float coreV = 0;
-            //((const xAOD::Egamma*) lepton)->isolationCaloCorrection(coreV, xAOD::Iso::etcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
-			//const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
-			//int n = 0;
-			//for (const auto& clus: filtered_calo_clusters){
-			//	cout<<"cluster: "<< n++<<endl;
-			//	if (!clus) continue;
-			//	if (clus->e()<0) continue;
-			//	float dR = egclus->p4().DeltaR(clus->p4()) ;		
-			//	if (dR < 0.2) calc_etcone20 += clus->et(); 
-			//	if (dR < 0.3) calc_etcone30 += clus->et(); 
-			//	if (dR < 0.4) calc_etcone40 += clus->et(); 
-			//}
-			//calc_etcone20 -= coreV ; calc_etcone20 = (calc_etcone20 < 0 ? 0 : calc_etcone20); 
-			//calc_etcone30 -= coreV ; calc_etcone30 = (calc_etcone30 < 0 ? 0 : calc_etcone30); 
-			//calc_etcone40 -= coreV ; calc_etcone40 = (calc_etcone40 < 0 ? 0 : calc_etcone40); 
+			float coreV = 0; float pu_corr20 = 0; float pu_corr30 = 0; float pu_corr40 = 0;float pt_corr20 = 0; float pt_corr30 = 0; float pt_corr40 = 0;
+ 			float areacore = 0.1*0.1*M_PI;
+			xAOD::Egamma* electron = (xAOD::Egamma*) lepton;
+            const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
+			float eta = egclus->eta();
+			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
+			electron->isolationCaloCorrection(coreV, xAOD::Iso::topoetcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
+			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI- areacore);if (pu_corr20!= 0) cout<<"elec:pu20: " <<pu_corr20<<endl;
+			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI- areacore);if (pu_corr30!= 0) cout<<"elec:pu30: " <<pu_corr30<<endl;
+			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI- areacore);if (pu_corr40!= 0) cout<<"elec:pu40: " <<pu_corr40<<endl;
+            //electron->isolationCaloCorrection(pu_corr, xAOD::Iso::topoetcone, xAOD::Iso::pileupCorrection, xAOD::Iso::coreEnergy);
+			//electron->isolationCaloCorrection (pu_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::pileupCorrection) ; if (pu_corr20!= 0) cout<<"pu20: " <<pu_corr<<endl;
+			//electron->isolationCaloCorrection (pu_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::pileupCorrection) ; if (pu_corr30!= 0) cout<<"pu30: " <<pu_corr<<endl;
+			//electron->isolationCaloCorrection (pu_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::pileupCorrection) ; if (pu_corr40!= 0) cout<<"pu40: " <<pu_corr<<endl;
+			electron->isolationCaloCorrection (pt_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::ptCorrection) ; if (pt_corr20!= 0) cout<<"pt20: " <<pt_corr20<<endl;
+			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; if (pt_corr30!= 0) cout<<"pt30: " <<pt_corr30<<endl;
+			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; if (pt_corr40!= 0) cout<<"pt40: " <<pt_corr40<<endl;
+
+			if (coreV != 0) cout<<"Elec: coreV: "<< coreV<<endl;
+			for (const auto& clus: filtered_calo_clusters){
+				if (!clus) continue;
+				if (clus->e()<0) continue;
+				float dR = egclus->p4().DeltaR(clus->p4()) ;		
+				if (dR < 0.2 && dR > 0.1  ) calc_etcone20 += clus->et(); 
+				if (dR < 0.3 && dR > 0.1 ) calc_etcone30 += clus->et(); 
+				if (dR < 0.4 && dR > 0.1  ) calc_etcone40 += clus->et(); 
+			}
+			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
+			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
+			calc_etcone20 -= pt_corr20 ; calc_etcone30 -= pt_corr30 ; calc_etcone40 -= pt_corr40 ; 
 
 		}else{
 			
@@ -361,15 +384,32 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			//for (const auto& clus: filtered_calo_clusters){
-			//	if (!clus) continue;
-			//	if (clus->e()<0) continue;
-			//	float dR = clus->p4().DeltaR(lepton->p4());
-	    	//	if (dR < 0.2 && dR > 0.05) calc_etcone20 += clus->et();
-	    	//	if (dR < 0.3 && dR > 0.05) calc_etcone30 += clus->et();
-	    	//	if (dR < 0.4 && dR > 0.05) calc_etcone40 += clus->et();
-			//}
-
+			float coreV = 0; float pu_corr20 = 0; float pu_corr30 = 0; float pu_corr40 = 0;
+ 			float areacore = 0.05*0.05*M_PI; float coreCone = 0;
+			xAOD::Muon* muon = (xAOD::Muon*)lepton;
+            float eta = lepton->eta();
+			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
+			
+			muon->isolationCaloCorrection(coreV, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreEnergy);
+			muon->isolationCaloCorrection(coreCone, xAOD::Iso::topoetcone, xAOD::Iso::coreCone, xAOD::Iso::coreEnergy);
+			//muon->isolationCaloCorrection(areacore, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreArea);
+			//muon->isolationCaloCorrection(pu_corr, xAOD::Iso::topoetcone, xAOD::Iso::pileupCorrection, xAOD::Iso::coreEnergy);
+			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI - areacore);  //if (pu_corr20!= 0) cout<<"mu:pu20: " <<pu_corr20<<endl;
+			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI - areacore);  //if (pu_corr30!= 0) cout<<"mu:pu30: " <<pu_corr30<<endl;
+			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI - areacore);  //if (pu_corr40!= 0) cout<<"mu:pu40: " <<pu_corr40<<endl;
+			
+			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
+			for (const auto& clus: filtered_calo_clusters){
+				if (!clus) continue;
+				if (clus->e()<0) continue;
+				float dR = clus->p4().DeltaR(lepton->p4());
+	    		if (dR < 0.2 ) calc_etcone20 += clus->et();
+	    		if (dR < 0.3 ) calc_etcone30 += clus->et();
+	    		if (dR < 0.4 ) calc_etcone40 += clus->et();
+			}
+			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
+			calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
+			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
 		}
 
         bool has_associated_tracks = false;
@@ -457,7 +497,7 @@ int main (int argc, char *argv[]) {
 
     for (entry_n = 0; entry_n < entries; ++entry_n) {
         //--- Get event
-        if (entry_n%2 == 0) cout << "Processing event " << entry_n << "/" << entries << "\n";
+        if (entry_n%500 == 0) cout << "Processing event " << entry_n << "/" << entries << "\n";
         event.getEntry(entry_n);
 
         //--- Get event objects
@@ -467,6 +507,9 @@ int main (int argc, char *argv[]) {
         const xAOD::MuonContainer *muons;
         const xAOD::CaloClusterContainer *calo_clusters;
         const xAOD::JetContainer *jets;
+		const xAOD::EventShape_v1* m_tpEDCentral ;
+		const xAOD::EventShape_v1* m_tpEDForward ;
+
 
         RETURN_CHECK(ALG, event.retrieve(tracks, "InDetTrackParticles"));
         RETURN_CHECK(ALG, event.retrieve(primary_vertices, "PrimaryVertices"));
@@ -474,8 +517,14 @@ int main (int argc, char *argv[]) {
         RETURN_CHECK(ALG, event.retrieve(muons, "Muons"));
         RETURN_CHECK(ALG, event.retrieve(calo_clusters, "CaloCalTopoClusters"));
         RETURN_CHECK(ALG, event.retrieve(jets, "AntiKt4EMTopoJets"));
+		RETURN_CHECK(ALG, event.retrieve(m_tpEDCentral, "TopoClusterIsoCentralEventShape") );
+		RETURN_CHECK(ALG, event.retrieve(m_tpEDForward, "TopoClusterIsoForwardEventShape") );
 
-        const xAOD::Vertex *primary_vertex = primary_vertices->at(0);
+		double rho_central = 0, rho_forward = 0;
+		m_tpEDCentral ->getDensity(xAOD::EventShape::Density,rho_central);
+		m_tpEDForward ->getDensity(xAOD::EventShape::Density,rho_forward);
+        
+		const xAOD::Vertex *primary_vertex = primary_vertices->at(0);
 
         //--- Filter objects
         vector<const xAOD::TrackParticle*> filtered_tracks = object_filters.filter_tracks(tracks, primary_vertex);
@@ -495,7 +544,7 @@ int main (int argc, char *argv[]) {
             const xAOD::Electron* electron = electron_info.first;
             truth_type = electron_info.second;
             pdgID = 11;
-            if (!process_lepton(electron, primary_vertex, filtered_tracks, filtered_calo_clusters, filtered_jets, true)) continue;
+            if (!process_lepton(electron, primary_vertex, filtered_tracks, filtered_calo_clusters, filtered_jets, rho_central, rho_forward, true)) continue;
             new_filtered_electrons.push_back(electron_info);
             unnormedTree->Fill();
         }
@@ -503,7 +552,7 @@ int main (int argc, char *argv[]) {
             const xAOD::Muon* muon = muon_info.first;
             truth_type = muon_info.second;
             pdgID = 13;
-            if (!process_lepton(muon, primary_vertex, filtered_tracks, filtered_calo_clusters, filtered_jets, false)) continue;
+            if (!process_lepton(muon, primary_vertex, filtered_tracks, filtered_calo_clusters, filtered_jets, rho_central, rho_forward, false)) continue;
             new_filtered_muons.push_back(muon_info);
             unnormedTree->Fill();
         }

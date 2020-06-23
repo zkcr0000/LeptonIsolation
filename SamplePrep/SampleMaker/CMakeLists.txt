@@ -50,6 +50,7 @@ set(_common
   InDetTrackSelectionToolLib
   xAODBTaggingEfficiencyLib
   xAODJet
+  xAODEventShape
 )
 
 
