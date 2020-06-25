@@ -87,8 +87,10 @@ class ObjectFilters {
 
         vector<pair<const xAOD::Electron*, int>> filter_electrons_truth_type(const xAOD::ElectronContainer* electrons) {
             vector<pair<const xAOD::Electron*, int>> m_current_electrons;
-            for (const xAOD::Electron *electron : *electrons) {
+            int count = 0;
+			for (const xAOD::Electron *electron : *electrons) {
                 // truth type: 2 = real prompt, 3 = HF
+				++count;
                 int truth_type = xAOD::TruthHelpers::getParticleTruthType(*electron);
                 if (truth_type != 2 && truth_type != 3) continue;
                 // truth parent (filter out tau decays)

@@ -388,8 +388,8 @@ int main (int argc, char *argv[]) {
  			float areacore = 0.05*0.05*M_PI; float coreCone = 0;
 			xAOD::Muon* muon = (xAOD::Muon*)lepton;
             float eta = lepton->eta();
-			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
-			
+			//double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
+			double rho = rho_central;
 			muon->isolationCaloCorrection(coreV, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreEnergy);
 			muon->isolationCaloCorrection(coreCone, xAOD::Iso::topoetcone, xAOD::Iso::coreCone, xAOD::Iso::coreEnergy);
 			//muon->isolationCaloCorrection(areacore, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreArea);
@@ -401,14 +401,18 @@ int main (int argc, char *argv[]) {
 			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
-				if (clus->e()<0) continue;
+				float et = clus->pt();
+				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = clus->p4().DeltaR(lepton->p4());
-	    		if (dR < 0.2 ) calc_etcone20 += clus->et();
-	    		if (dR < 0.3 ) calc_etcone30 += clus->et();
-	    		if (dR < 0.4 ) calc_etcone40 += clus->et();
+	    		float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
+				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
+				et -= tilegap3_et;
+				if (dR < 0.2 &&dR>0.05 ) calc_etcone20 += et  ;
+	    		if (dR < 0.3 &&dR>0.05 ) calc_etcone30 += et  ;
+	    		if (dR < 0.4 &&dR>0.05 ) calc_etcone40 += et  ;
 			}
 			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
-			calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
+			//calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
 		}
 
@@ -494,11 +498,14 @@ int main (int argc, char *argv[]) {
     cout << "\nProcessing leptons" << endl;
 
     ObjectFilters object_filters;
-
+    int electron_number = 0;
+	int filtered_electron_number = 0;
     for (entry_n = 0; entry_n < entries; ++entry_n) {
         //--- Get event
         if (entry_n%500 == 0) cout << "Processing event " << entry_n << "/" << entries << "\n";
-        event.getEntry(entry_n);
+        if (entry_n%500 == 0) cout << "Processed electrons: "<< electron_number<<"\n";
+        if (entry_n%500 == 0) cout << "Processed filtered electrons: "<< filtered_electron_number<<"\n";
+		event.getEntry(entry_n);
 
         //--- Get event objects
         const xAOD::TrackParticleContainer *tracks;
@@ -525,7 +532,9 @@ int main (int argc, char *argv[]) {
 		m_tpEDForward ->getDensity(xAOD::EventShape::Density,rho_forward);
         
 		const xAOD::Vertex *primary_vertex = primary_vertices->at(0);
-
+		electron_number += electrons->size();
+		//for (const xAOD::Electron* electron: *electrons) { ++electron_number;}
+		
         //--- Filter objects
         vector<const xAOD::TrackParticle*> filtered_tracks = object_filters.filter_tracks(tracks, primary_vertex);
         vector<pair<const xAOD::Electron*, int>> filtered_electrons = object_filters.filter_electrons_truth_type(electrons);
@@ -536,6 +545,8 @@ int main (int argc, char *argv[]) {
         update_cutflow(filtered_electrons, filtered_muons, 1);
         vector<const xAOD::CaloCluster*> filtered_calo_clusters = object_filters.filter_calo_clusters(calo_clusters);
         vector<const xAOD::Jet*> filtered_jets = object_filters.filter_jets(jets);
+
+		filtered_electron_number += filtered_electrons.size();
 
         //--- Write event
         vector<pair<const xAOD::Electron*, int>> new_filtered_electrons;
