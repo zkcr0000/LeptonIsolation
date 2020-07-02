@@ -169,6 +169,8 @@ int main (int argc, char *argv[]) {
     vector<float>* calo_cluster_lep_dEta = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dEta", "vector<float>", &calo_cluster_lep_dEta);
     vector<float>* calo_cluster_lep_dPhi = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dPhi", "vector<float>", &calo_cluster_lep_dPhi);
 
+	vector<int>* calo_cluster_size = new vector<int>; unnormedTree->Branch("calo_cluster_size","vector<int>", &calo_cluster_size);
+
     //--- Cutflow table [HF_electron/isolated_electron/HF_muon/isolated_muon][truth_type/medium/impact_params/isolation]
     int cutflow_table[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
 
@@ -381,10 +383,15 @@ int main (int argc, char *argv[]) {
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				if (clus->e()<0) continue;
+				float et = clus->pt();
+				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = egclus->p4().DeltaR(clus->p4()) ;		
-				if (dR < 0.2  ) calc_etcone20 += clus->et(); 
-				if (dR < 0.3  ) calc_etcone30 += clus->et(); 
-				if (dR < 0.4  ) calc_etcone40 += clus->et(); 
+				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
+				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
+				et -= tilegap3_et;
+				if (dR < 0.2  ) calc_etcone20 += et; 
+				if (dR < 0.3  ) calc_etcone30 += et; 
+				if (dR < 0.4  ) calc_etcone40 += et; 
 			}
 			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
@@ -494,7 +501,7 @@ int main (int argc, char *argv[]) {
         //--- Store calo clusters associated to lepton in dR cone
         calo_cluster_lep_dR->clear(); calo_cluster_e->clear(); calo_cluster_pT->clear(); calo_cluster_eta->clear(); calo_cluster_phi->clear();
         /*calo_cluster_etamoment->clear(); calo_cluster_phimoment->clear();*/ calo_cluster_lep_dEta->clear(); calo_cluster_lep_dPhi->clear();
-
+		calo_cluster_size->clear();
         for (auto calo_cluster : filtered_calo_clusters) {
             float dR = calo_cluster->p4().DeltaR(lepton->p4());
             if (dR > max_dR) continue; 
@@ -509,6 +516,7 @@ int main (int argc, char *argv[]) {
 
             calo_cluster_lep_dEta->push_back(calo_cluster->eta() - lep_eta);
             calo_cluster_lep_dPhi->push_back(calo_cluster->phi() - lep_phi);
+			calo_cluster_size->push_back( (int) calo_cluster->clusterSize() );
         }
 
         //--- Remove leptons with no associated tracks
