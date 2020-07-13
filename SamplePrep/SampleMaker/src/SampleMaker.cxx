@@ -359,7 +359,7 @@ int main (int argc, char *argv[]) {
 			
 			//float pt_corr20 = 0; float pt_corr30 = 0; float pt_corr40 = 0;
  			
-			float areacore = 0.1*0.1*M_PI;
+			float areacore = 5*7*0.025*2 *M_PI/256;
 			xAOD::Egamma* electron = (xAOD::Egamma*) lepton;
             const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
 			float eta = egclus->eta();
@@ -383,10 +383,10 @@ int main (int argc, char *argv[]) {
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				if (clus->e()<0) continue;
-				float et = clus->pt();
+				float et = clus->p4(CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = egclus->p4().DeltaR(clus->p4()) ;		
-				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
+				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta());
 				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
 				et -= tilegap3_et;
 				if (dR < 0.2  ) calc_etcone20 += et; 
@@ -430,7 +430,7 @@ int main (int argc, char *argv[]) {
 			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
-				float et = clus->pt();
+				float et = clus->p4(CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = clus->p4().DeltaR(lepton->p4());
 	    		float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
