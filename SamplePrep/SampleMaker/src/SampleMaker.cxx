@@ -383,7 +383,7 @@ int main (int argc, char *argv[]) {
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				if (clus->e()<0) continue;
-				float et = clus->p4(CaloCluster::State::UNCALIBRATED).Et();
+				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = egclus->p4().DeltaR(clus->p4()) ;		
 				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta());
@@ -430,7 +430,7 @@ int main (int argc, char *argv[]) {
 			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
-				float et = clus->p4(CaloCluster::State::UNCALIBRATED).Et();
+				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
 				float dR = clus->p4().DeltaR(lepton->p4());
 	    		float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
@@ -441,8 +441,8 @@ int main (int argc, char *argv[]) {
 	    		if (dR < 0.4 ) calc_etcone40 += et  ;
 				if (dR <= 0.05) calc_coreCone += et ;
 			}
-			//calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
-			calc_etcone20 -= ET_core ; calc_etcone30 -= ET_core ; calc_etcone40 -= ET_core ; 
+			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
+			//calc_etcone20 -= ET_core ; calc_etcone30 -= ET_core ; calc_etcone40 -= ET_core ; 
 			calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
 		}
