@@ -379,13 +379,18 @@ int main (int argc, char *argv[]) {
 			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; //if (pt_corr30!= 0) cout<<"pt30: " <<pt_corr30<<endl;
 			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; //if (pt_corr40!= 0) cout<<"pt40: " <<pt_corr40<<endl;
 
+            float phi = electron->caloCluster()->phi();
+            float eta = electron->caloCluster()->eta();
 			//if (coreV != 0) cout<<"Elec: coreV: "<< coreV<<endl;
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				if (clus->e()<0) continue;
 				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
-				float dR = egclus->p4().DeltaR(clus->p4()) ;		
+				//float dR = egclus->p4().DeltaR(clus->p4()) ;
+                float dPhi = Phi_mpi_pi(clus->phi()-phi);
+                float dEta = clus->eta()-eta;
+                float dR=sqrt(dPhi*dPhi+ dEta*dEta);		
 				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta());
 				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
 				et -= tilegap3_et;
@@ -427,12 +432,18 @@ int main (int argc, char *argv[]) {
 			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI - areacore);  //if (pu_corr30!= 0) cout<<"mu:pu30: " <<pu_corr30<<endl;
 			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI - areacore);  //if (pu_corr40!= 0) cout<<"mu:pu40: " <<pu_corr40<<endl;
 			
+            float phi = muon->caloCluster()->phi();
+            float eta = muon->caloCluster()->eta();
 			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
-				float dR = clus->p4().DeltaR(lepton->p4());
+
+			    float dPhi = Phi_mpi_pi(clus->phi()-phi);
+                float dEta = clus->eta()-eta;
+                float dR=sqrt(dPhi*dPhi+ dEta*dEta);
+                //float dR = egclus->p4().DeltaR(clus->p4()) ;
 	    		float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
 				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
 				et -= tilegap3_et;
