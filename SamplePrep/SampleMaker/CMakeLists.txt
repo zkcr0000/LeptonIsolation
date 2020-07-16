@@ -53,6 +53,16 @@ set(_common
   xAODEventShape
 )
 
+atlas_depends_on_subdirs(
+	Event/FourMomUtils
+) 
+# External dependencies:
+find_package( Boost )
+
+atlas_add_library(
+	PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils
+)
+
 
 # build the test executable:
 atlas_add_executable( SampleMaker src/SampleMaker.cxx ${_common})

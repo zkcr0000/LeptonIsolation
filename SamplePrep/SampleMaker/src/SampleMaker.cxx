@@ -37,7 +37,7 @@
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
-
+#include "FourMomUtils/xAODP4Helpers.h"
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -619,22 +619,23 @@ int main(int argc, char *argv[])
             {
                 if (!clus)
                     continue;
-                float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
+		float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
                 if (et <= 0 || fabs(clus->eta()) > 7.0)
                     continue;
 
                 //Calculate eta and phi
-                /*
+                /* 
                 static SG::AuxElement::ConstAccessor< char > Decorated("caloExt_Decorated");
                 static SG::AuxElement::ConstAccessor< float > Eta("caloExt_eta");
                 static SG::AuxElement::ConstAccessor< float > Phi("caloExt_phi");
-                if(Decorated.isAvailable(*tp) && Decorated(*tp)){
-                eta = Eta(*tp);
-                phi = Phi(*tp);
+                if(Decorated.isAvailable(*own_track) && Decorated(*own_track)){
+                eta_calo = Eta(*own_track);
+                phi_calo = Phi(*own_track);
                 return true;
                 }
+		
+                else{
                 */
-
                 auto cluster = muon->cluster();
                 float etaT = 0, phiT = 0, dphiT = 0;
                 int nSample = 0;
@@ -644,7 +645,6 @@ int main(int argc, char *argv[])
                     auto s = static_cast<CaloSampling::CaloSample>(i);
                     if (!cluster->hasSampling(s))
                         continue;
-                    ATH_MSG_DEBUG("Sampling: " << i << "eta-phi (" << cluster->etaSample(s) << ", " << cluster->phiSample(s) << ")");
                     etaT += cluster->etaSample(s);
                     if (nSample == 0)
                         phiT = cluster->phiSample(s);
@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
                 }
                 eta_calo = etaT / nSample;
                 phi_calo = phiT + dphiT / nSample;
-
+//}
                 //if(!Decorated.isAvailable(*own_track)) decorateTrackCaloPosition(*tp, eta, phi);
                 /* not sure about decorateTrackCalo
                 if (m_addCaloDeco && !Decorated.isAvailable(*tp))
