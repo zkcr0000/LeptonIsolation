@@ -37,6 +37,7 @@ set(_common
   src/TrackWriter.cxx
   src/ElectronWriter.cxx
   src/MuonWriter.cxx
+  Event/FourMomUtils
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
   LINK_LIBRARIES ${ROOT_LIBRARIES} ${HDF5_LIBRARIES} ${LWTNN_LIBRARIES}
   xAODRootAccess
@@ -53,7 +54,15 @@ set(_common
   xAODEventShape
 )
 
+atlas_depends_on_subdirs(
+	Event/FourMomUtils
+) 
+# External dependencies:
+find_package( Boost )
 
+atlas_add_library(
+	PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils
+)
 # build the test executable:
 atlas_add_executable( SampleMaker src/SampleMaker.cxx ${_common})
 

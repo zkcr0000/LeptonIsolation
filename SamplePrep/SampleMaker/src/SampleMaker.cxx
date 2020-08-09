@@ -25,6 +25,9 @@
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 
+
+
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPrimitives/IsolationConeSize.h"
 #include "xAODPrimitives/IsolationFlavour.h"
 #include "xAODPrimitives/IsolationCorrection.h"
@@ -109,18 +112,16 @@ int main (int argc, char *argv[]) {
     float calc_etcone40; unnormedTree->Branch("calc_etcone40", &calc_etcone40, "calc_etcone40/F");
 
 
-	float coreV; unnormedTree->Branch("coreMuon", &coreV, "coreMuon/F");
-    float coreCone; unnormedTree->Branch("coreCone", &coreCone, "coreCone/F");
-    float ET_core; unnormedTree->Branch("ET_core", &ET_core, "ET_core/F");
-	float pu_corr20; unnormedTree->Branch("pu_corr20", &pu_corr20, "pu_corr20/F");
-    float pu_corr30; unnormedTree->Branch("pu_corr30", &pu_corr30, "pu_corr30/F");
-    float pu_corr40; unnormedTree->Branch("pu_corr40", &pu_corr40, "pu_corr40/F");
+	float core57; unnormedTree->Branch("lep_core57", &core57, "core57/F");
+    float coreCone; unnormedTree->Branch("lep_coreCone", &coreCone, "coreCone/F");
+    float pu_corr20; unnormedTree->Branch("lep_pu_corr20", &pu_corr20, "pu_corr20/F");
+    float pu_corr30; unnormedTree->Branch("lep_pu_corr30", &pu_corr30, "pu_corr30/F");
+    float pu_corr40; unnormedTree->Branch("lep_pu_corr40", &pu_corr40, "pu_corr40/F");
 	
-	float pt_corr20; unnormedTree->Branch("pt_corr20", &pt_corr20, "pt_corr20/F");
-    float pt_corr30; unnormedTree->Branch("pt_corr30", &pt_corr30, "pt_corr30/F");
-    float pt_corr40; unnormedTree->Branch("pt_corr40", &pt_corr40, "pt_corr40/F");
+	float pt_corr20; unnormedTree->Branch("lep_pt_corr20", &pt_corr20, "pt_corr20/F");
+    float pt_corr30; unnormedTree->Branch("lep_pt_corr30", &pt_corr30, "pt_corr30/F");
+    float pt_corr40; unnormedTree->Branch("lep_pt_corr40", &pt_corr40, "pt_corr40/F");
 
-	float calc_coreCone; unnormedTree->Branch("calc_coreCone", &calc_coreCone, "calc_coreCone/F");
 
     float lep_pT; unnormedTree->Branch("lep_pT", &lep_pT, "lep_pT/F");
     unnormedTree->Branch("ROC_slicing_lep_pT", &lep_pT, "ROC_slicing_lep_pT/F");  // for making ROC curve plots
@@ -160,16 +161,13 @@ int main (int argc, char *argv[]) {
 
     // See https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaD3PDtoxAOD
     vector<float>* calo_cluster_lep_dR = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dR", "vector<float>", &calo_cluster_lep_dR);
-    vector<float>* calo_cluster_e = new vector<float>; unnormedTree->Branch("calo_cluster_e", "vector<float>", &calo_cluster_e);
-    vector<float>* calo_cluster_pT = new vector<float>; unnormedTree->Branch("calo_cluster_pT", "vector<float>", &calo_cluster_pT);
+    vector<float>* calo_cluster_et = new vector<float>; unnormedTree->Branch("calo_cluster_et", "vector<float>", &calo_cluster_et);
     vector<float>* calo_cluster_eta = new vector<float>; unnormedTree->Branch("calo_cluster_eta", "vector<float>", &calo_cluster_eta);
     vector<float>* calo_cluster_phi = new vector<float>; unnormedTree->Branch("calo_cluster_phi", "vector<float>", &calo_cluster_phi);
-    //vector<float>* calo_cluster_etamoment = new vector<float>; unnormedTree->Branch("calo_cluster_etamoment", "vector<float>", &calo_cluster_etamoment);
-    //vector<float>* calo_cluster_phimoment = new vector<float>; unnormedTree->Branch("calo_cluster_phimoment", "vector<float>", &calo_cluster_phimoment);
     vector<float>* calo_cluster_lep_dEta = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dEta", "vector<float>", &calo_cluster_lep_dEta);
     vector<float>* calo_cluster_lep_dPhi = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dPhi", "vector<float>", &calo_cluster_lep_dPhi);
+	vector<float>* calo_cluster_TGap3 = new vector<float>; unnormedTree->Branch("cal_cluster_TGap3", "vector<float>", &calo_cluster_TGap3);
 
-	vector<int>* calo_cluster_size = new vector<int>; unnormedTree->Branch("calo_cluster_size","vector<int>", &calo_cluster_size);
 
     //--- Cutflow table [HF_electron/isolated_electron/HF_muon/isolated_muon][truth_type/medium/impact_params/isolation]
     int cutflow_table[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
@@ -338,6 +336,9 @@ int main (int argc, char *argv[]) {
 		float var_R_30 = std::min(10e3/lepton->pt(), 0.30); 
 		float var_R_40 = std::min(10e3/lepton->pt(), 0.40);
 
+		calo_cluster_lep_dR->clear();  calo_cluster_et->clear(); calo_cluster_eta->clear(); calo_cluster_phi->clear();
+        calo_cluster_lep_dEta->clear(); calo_cluster_lep_dPhi->clear(); calo_cluster_TGap3->clear();
+
 		if (is_electron){
 			std::set<const xAOD::TrackParticle*> electron_tracks = xAOD::EgammaHelpers::getTrackParticles((const xAOD::Egamma*)lepton, true);
 			for (auto trk : filtered_tracks) {
@@ -354,10 +355,7 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			//float coreV = 0; float pu_corr20 = 0; float pu_corr30 = 0; float pu_corr40 = 0;
-			coreV = 0;  pu_corr20 = 0;  pu_corr30 = 0;  pu_corr40 = 0; pt_corr20 = 0;  pt_corr30 = 0;  pt_corr40 = 0;
-			
-			//float pt_corr20 = 0; float pt_corr30 = 0; float pt_corr40 = 0;
+			core57 = 0; coreCone = 0;  pu_corr20 = 0;  pu_corr30 = 0;  pu_corr40 = 0; pt_corr20 = 0;  pt_corr30 = 0;  pt_corr40 = 0;			
  			
 			float areacore = 5*7*0.025*2 *M_PI/256;
 			xAOD::Egamma* electron = (xAOD::Egamma*) lepton;
@@ -365,40 +363,71 @@ int main (int argc, char *argv[]) {
 			float eta = egclus->eta();
 			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
 			
-			electron->isolationCaloCorrection(coreV, xAOD::Iso::topoetcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
-			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI- areacore);//if (pu_corr20!= 0) cout<<"elec:pu20: " <<pu_corr20<<endl;
-			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI- areacore);//if (pu_corr30!= 0) cout<<"elec:pu30: " <<pu_corr30<<endl;
-			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI- areacore);//if (pu_corr40!= 0) cout<<"elec:pu40: " <<pu_corr40<<endl;
+			electron->isolationCaloCorrection(core57, xAOD::Iso::topoetcone, xAOD::Iso::core57cells, xAOD::Iso::coreEnergy);
+			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI- areacore);
+			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI- areacore);
+			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI- areacore);
 			
-			//pile up 
-			//electron->isolationCaloCorrection (pu_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::pileupCorrection) ; if (pu_corr20!= 0) cout<<"pu20: " <<pu_corr<<endl;
-			//electron->isolationCaloCorrection (pu_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::pileupCorrection) ; if (pu_corr30!= 0) cout<<"pu30: " <<pu_corr<<endl;
-			//electron->isolationCaloCorrection (pu_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::pileupCorrection) ; if (pu_corr40!= 0) cout<<"pu40: " <<pu_corr<<endl;
 			
-			electron->isolationCaloCorrection (pt_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::ptCorrection) ; //if (pt_corr20!= 0) cout<<"pt20: " <<pt_corr20<<endl;
-			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; //if (pt_corr30!= 0) cout<<"pt30: " <<pt_corr30<<endl;
-			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; //if (pt_corr40!= 0) cout<<"pt40: " <<pt_corr40<<endl;
+			electron->isolationCaloCorrection (pt_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::ptCorrection) ; 
+			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; 
+			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; 
 
-			//if (coreV != 0) cout<<"Elec: coreV: "<< coreV<<endl;
+			float trk_phi = own_track->phi();
+			float trk_eta = own_track->eta();
+
+			auto cluster = electron->cluster();
+            float etaT = 0, phiT = 0, dphiT = 0;
+            int nSample = 0;
+            for (unsigned int i = 0; i < CaloSampling::Unknown; i++) // dangerous?
+            {
+
+                auto s = static_cast<CaloSampling::CaloSample>(i);
+                if (!cluster->hasSampling(s))
+                    continue;
+                etaT += cluster->etaSample(s);
+                if (nSample == 0)
+                    phiT = cluster->phiSample(s);
+                else
+                    dphiT += xAOD::P4Helpers::deltaPhi(cluster->phiSample(s), phiT);
+                nSample++;
+            }
+            trk_eta = etaT / nSample;
+            trk_phi = phiT + dphiT / nSample;
+
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				if (clus->e()<0) continue;
 				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
-				float dR = egclus->p4().DeltaR(clus->p4()) ;		
+				
+
+				float calo_phi  = clus->phi();
+				float calo_eta =  clus->eta();
+				float dphi = TVector2::Phi_mpi_pi(calo_phi - trk_phi);
+				float deta = calo_eta-trk_eta;
+				float dR = dphi*dphi + deta*deta;
+				dR = sqrt(dR);
+				
 				float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
 				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
 				et -= tilegap3_et;
-				if (dR < 0.2  ) calc_etcone20 += et; 
-				if (dR < 0.3  ) calc_etcone30 += et; 
-				if (dR < 0.4  ) calc_etcone40 += et; 
+				if (dR < dR20  ) calc_etcone20 += et; 
+				if (dR < dR30  ) calc_etcone30 += et; 
+				if (dR < dR40  ) calc_etcone40 += et; 
+				calo_cluster_lep_dR->push_back(dR);
+				calo_cluster_et->puhs_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et())
+            	calo_cluster_eta->push_back(clus->eta());
+            	calo_cluster_phi->push_back(clus->phi());
+            	calo_cluster_TGap3->push_back(tilegap3_et);
+            	calo_cluster_lep_dEta->push_back(deta);
+            	calo_cluster_lep_dPhi->push_back(dphi);
 			}
-			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
+			calc_etcone20 -= core57 ; calc_etcone30 -= core57 ; calc_etcone40 -= core57 ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
 			calc_etcone20 -= pt_corr20 ; calc_etcone30 -= pt_corr30 ; calc_etcone40 -= pt_corr40 ; 
-
 		}else{
-			
+			//Muon:
 			xAOD::Muon::TrackParticleType type = xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle;
 			auto own_track = ((xAOD::Muon*)lepton)->trackParticle(type);
 			for (auto trk : filtered_tracks) {
@@ -411,40 +440,71 @@ int main (int argc, char *argv[]) {
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_30) calc_ptvarcone30 += trk->pt();
 			    if (trk->p4().DeltaR(lepton->p4()) < var_R_40) calc_ptvarcone40 += trk->pt();
 			}
-			//float coreV = 0; float pu_corr20 = 0; float pu_corr30 = 0; float pu_corr40 = 0; float coreCone=0;
-			coreV = 0;  pu_corr20 = 0;  pu_corr30 = 0;  pu_corr40 = 0;  coreCone=0; calc_coreCone=0; ET_core = 0;
+			
+			core57 =0 ; pu_corr20 = 0;  pu_corr30 = 0;  pu_corr40 = 0;  coreCone=0; 
+			pt_corr20 = 0; pt_corr30 = 0; pt_corr40 = 0;
  			float areacore = 0.05*0.05*M_PI; 
 			xAOD::Muon* muon = (xAOD::Muon*)lepton;
             float eta = lepton->eta();
 			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
 			
 			if ( muon->isAvailable<float>("ET_Core") ) ET_core = muon->auxdataConst<float>("ET_Core");
-			muon->isolationCaloCorrection(coreV, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreEnergy);
 			muon->isolationCaloCorrection(coreCone, xAOD::Iso::topoetcone, xAOD::Iso::coreCone, xAOD::Iso::coreEnergy);
-			//muon->isolationCaloCorrection(areacore, xAOD::Iso::topoetcone, xAOD::Iso::coreMuon, xAOD::Iso::coreArea);
-			//muon->isolationCaloCorrection(pu_corr, xAOD::Iso::topoetcone, xAOD::Iso::pileupCorrection, xAOD::Iso::coreEnergy);
-			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI - areacore);  //if (pu_corr20!= 0) cout<<"mu:pu20: " <<pu_corr20<<endl;
-			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI - areacore);  //if (pu_corr30!= 0) cout<<"mu:pu30: " <<pu_corr30<<endl;
-			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI - areacore);  //if (pu_corr40!= 0) cout<<"mu:pu40: " <<pu_corr40<<endl;
+			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI - areacore);  
+			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI - areacore); 
+			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI - areacore);
 			
-			//if (coreV != 0) cout<<"Muon: coreV: "<< coreV<<endl;
+			float trk_phi = own_track->phi();
+			float trk_eta = own_track->eta();
+
+			auto cluster = muon->cluster();
+            float etaT = 0, phiT = 0, dphiT = 0;
+            int nSample = 0;
+            for (unsigned int i = 0; i < CaloSampling::Unknown; i++) // dangerous?
+            {
+
+                auto s = static_cast<CaloSampling::CaloSample>(i);
+                if (!cluster->hasSampling(s))
+                    continue;
+                etaT += cluster->etaSample(s);
+                if (nSample == 0)
+                    phiT = cluster->phiSample(s);
+                else
+                    dphiT += xAOD::P4Helpers::deltaPhi(cluster->phiSample(s), phiT);
+                nSample++;
+            }
+            trk_eta = etaT / nSample;
+            trk_phi = phiT + dphiT / nSample;
+
 			for (const auto& clus: filtered_calo_clusters){
 				if (!clus) continue;
 				float et = clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et();
 				if (et<=0 || fabs(clus->eta())>7.0) continue;
-				float dR = clus->p4().DeltaR(lepton->p4());
+
+				float calo_phi  = clus->phi();
+				float calo_eta =  clus->eta();
+				float dphi = TVector2::Phi_mpi_pi(calo_phi - trk_phi);
+				float deta = calo_eta-trk_eta;
+				float dR = dphi*dphi + deta*deta;
+				dR = sqrt(dR);
 	    		float st = 1./cosh(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Eta() );
 				float tilegap3_et = clus->eSample(CaloSampling::TileGap3)*st;
 				et -= tilegap3_et;
-				if (dR < 0.2 ) calc_etcone20 += et  ;
-	    		if (dR < 0.3 ) calc_etcone30 += et  ;
-	    		if (dR < 0.4 ) calc_etcone40 += et  ;
-				if (dR <= 0.05) calc_coreCone += et ;
+				if (dR < dR20 ) calc_etcone20 += et  ;
+	    		if (dR < dR30 ) calc_etcone30 += et  ;
+	    		if (dR < dR40 ) calc_etcone40 += et  ;
+				calo_cluster_lep_dR->push_back(dR);
+				calo_cluster_et->puhs_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et())
+            	calo_cluster_eta->push_back(calo_eta);
+            	calo_cluster_phi->push_back(calo_phi);
+            	calo_cluster_TGap3->push_back(tilegap3_et);
+            	calo_cluster_lep_dEta->push_back(deta);
+            	calo_cluster_lep_dPhi->push_back(dphi);
+
 			}
-			calc_etcone20 -= coreV ; calc_etcone30 -= coreV ; calc_etcone40 -= coreV ; 
-			//calc_etcone20 -= ET_core ; calc_etcone30 -= ET_core ; calc_etcone40 -= ET_core ; 
 			calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
+
 		}
 
         bool has_associated_tracks = false;
@@ -499,27 +559,6 @@ int main (int argc, char *argv[]) {
         }
 
         //--- Store calo clusters associated to lepton in dR cone
-        calo_cluster_lep_dR->clear(); calo_cluster_e->clear(); calo_cluster_pT->clear(); calo_cluster_eta->clear(); calo_cluster_phi->clear();
-        /*calo_cluster_etamoment->clear(); calo_cluster_phimoment->clear();*/ calo_cluster_lep_dEta->clear(); calo_cluster_lep_dPhi->clear();
-		calo_cluster_size->clear();
-        for (auto calo_cluster : filtered_calo_clusters) {
-            float dR = calo_cluster->p4().DeltaR(lepton->p4());
-            if (dR > max_dR) continue; 
-
-            calo_cluster_lep_dR->push_back(dR);
-            calo_cluster_e->push_back(calo_cluster->e());
-            calo_cluster_pT->push_back(calo_cluster->pt());
-            calo_cluster_eta->push_back(calo_cluster->eta());
-            calo_cluster_phi->push_back(calo_cluster->phi());
-            //calo_cluster_etamoment->push_back(calo_cluster->getMomentValue(xAOD::CaloCluster::ETA1CALOFRAME));
-            //calo_cluster_phimoment->push_back(calo_cluster->getMomentValue(xAOD::CaloCluster::PHI1CALOFRAME));
-
-            calo_cluster_lep_dEta->push_back(calo_cluster->eta() - lep_eta);
-            calo_cluster_lep_dPhi->push_back(calo_cluster->phi() - lep_phi);
-			calo_cluster_size->push_back( (int) calo_cluster->clusterSize() );
-        }
-
-        //--- Remove leptons with no associated tracks
         return has_associated_tracks;
     };
 
