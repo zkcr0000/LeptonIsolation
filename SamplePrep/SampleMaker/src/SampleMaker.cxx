@@ -93,7 +93,7 @@ int main (int argc, char *argv[]) {
     float topoetcone30_over_pt; unnormedTree->Branch("baseline_topoetcone30_over_pt", &topoetcone30_over_pt, "baseline_topoetcone30_over_pt/F");
     float topoetcone40_over_pt; unnormedTree->Branch("baseline_topoetcone40_over_pt", &topoetcone40_over_pt, "baseline_topoetcone40_over_pt/F");
     float eflowcone20_over_pt; unnormedTree->Branch("baseline_eflowcone20_over_pt", &eflowcone20_over_pt, "baseline_eflowcone20_over_pt/F");
-    //float PLT; unnormedTree->Branch("baseline_PLT", &PLT, "baseline_PLT/F");
+    float PLT; unnormedTree->Branch("baseline_PLT", &PLT, "baseline_PLT/F");
 
 	float calc_ptcone20; unnormedTree->Branch("calc_ptcone20", &calc_ptcone20, "calc_ptcone20/F");
     float calc_ptcone30; unnormedTree->Branch("calc_ptcone30", &calc_ptcone30, "calc_ptcone30/F");
@@ -166,9 +166,8 @@ int main (int argc, char *argv[]) {
     vector<float>* calo_cluster_phi = new vector<float>; unnormedTree->Branch("calo_cluster_phi", "vector<float>", &calo_cluster_phi);
     vector<float>* calo_cluster_lep_dEta = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dEta", "vector<float>", &calo_cluster_lep_dEta);
     vector<float>* calo_cluster_lep_dPhi = new vector<float>; unnormedTree->Branch("calo_cluster_lep_dPhi", "vector<float>", &calo_cluster_lep_dPhi);
-	vector<float>* calo_cluster_TGap3 = new vector<float>; unnormedTree->Branch("cal_cluster_TGap3", "vector<float>", &calo_cluster_TGap3);
-
-
+	vector<float>* calo_cluster_TGap3 = new vector<float>; unnormedTree->Branch("calo_cluster_TGap3", "vector<float>", &calo_cluster_TGap3);
+    vector<int>* Cluster_size =  new vector<int>; unnormedTree->Branch("Cluster_size", "vector<int>", &Cluster_size); 
     //--- Cutflow table [HF_electron/isolated_electron/HF_muon/isolated_muon][truth_type/medium/impact_params/isolation]
     int cutflow_table[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
 
@@ -262,6 +261,7 @@ int main (int argc, char *argv[]) {
         lep_z0 = track_particle->z0();
         lep_dz0 = track_particle->z0() - primary_vertex->z();
         // PLT = accessPromptVar(*lepton);
+        PLT = 1.0;
         if (is_electron) process_electron_cones((const xAOD::Electron*)lepton);
         else process_muon_cones((const xAOD::Muon*)lepton);
 
@@ -306,7 +306,7 @@ int main (int argc, char *argv[]) {
         if (!passes_cuts) return false;
 
         //--- Store tracks associated to lepton in dR cone
-        float max_dR = 0.5;
+        float max_dR = 0.4;
 
         auto get_electron_own_tracks = [&] (const xAOD::Electron* electron) {
             set<const xAOD::TrackParticle*> electron_tracks = xAOD::EgammaHelpers::getTrackParticles((const xAOD::Egamma*)electron, true);
@@ -368,15 +368,14 @@ int main (int argc, char *argv[]) {
 			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI- areacore);
 			float dR40= xAOD::Iso::coneSize(xAOD::Iso::topoetcone40); pu_corr40 = rho*(dR40*dR40*M_PI- areacore);
 			
-			
 			electron->isolationCaloCorrection (pt_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::ptCorrection) ; 
 			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; 
 			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; 
 
-			float trk_phi = own_track->phi();
-			float trk_eta = own_track->eta();
+			float trk_phi = electron->caloCluster()->phi();
+			float trk_eta = electron->caloCluster()->eta();
 
-			auto cluster = electron->cluster();
+			auto cluster = electron->caloCluster();
             float etaT = 0, phiT = 0, dphiT = 0;
             int nSample = 0;
             for (unsigned int i = 0; i < CaloSampling::Unknown; i++) // dangerous?
@@ -415,13 +414,15 @@ int main (int argc, char *argv[]) {
 				if (dR < dR20  ) calc_etcone20 += et; 
 				if (dR < dR30  ) calc_etcone30 += et; 
 				if (dR < dR40  ) calc_etcone40 += et; 
+				if (dR > max_dR) continue;
 				calo_cluster_lep_dR->push_back(dR);
-				calo_cluster_et->puhs_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et())
+				calo_cluster_et->push_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et());
             	calo_cluster_eta->push_back(clus->eta());
             	calo_cluster_phi->push_back(clus->phi());
             	calo_cluster_TGap3->push_back(tilegap3_et);
             	calo_cluster_lep_dEta->push_back(deta);
             	calo_cluster_lep_dPhi->push_back(dphi);
+				Cluster_size->push_back( (int) clus->clusterSize() );
 			}
 			calc_etcone20 -= core57 ; calc_etcone30 -= core57 ; calc_etcone40 -= core57 ; 
 			calc_etcone20 -= pu_corr20 ; calc_etcone30 -= pu_corr30 ; calc_etcone40 -= pu_corr40 ; 
@@ -448,7 +449,6 @@ int main (int argc, char *argv[]) {
             float eta = lepton->eta();
 			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
 			
-			if ( muon->isAvailable<float>("ET_Core") ) ET_core = muon->auxdataConst<float>("ET_Core");
 			muon->isolationCaloCorrection(coreCone, xAOD::Iso::topoetcone, xAOD::Iso::coreCone, xAOD::Iso::coreEnergy);
 			float dR20= xAOD::Iso::coneSize(xAOD::Iso::topoetcone20); pu_corr20 = rho*(dR20*dR20*M_PI - areacore);  
 			float dR30= xAOD::Iso::coneSize(xAOD::Iso::topoetcone30); pu_corr30 = rho*(dR30*dR30*M_PI - areacore); 
@@ -493,13 +493,15 @@ int main (int argc, char *argv[]) {
 				if (dR < dR20 ) calc_etcone20 += et  ;
 	    		if (dR < dR30 ) calc_etcone30 += et  ;
 	    		if (dR < dR40 ) calc_etcone40 += et  ;
+				if (dR > max_dR) continue;
 				calo_cluster_lep_dR->push_back(dR);
-				calo_cluster_et->puhs_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et())
+				calo_cluster_et->push_back(clus->p4(xAOD::CaloCluster::State::UNCALIBRATED).Et());
             	calo_cluster_eta->push_back(calo_eta);
             	calo_cluster_phi->push_back(calo_phi);
             	calo_cluster_TGap3->push_back(tilegap3_et);
             	calo_cluster_lep_dEta->push_back(deta);
             	calo_cluster_lep_dPhi->push_back(dphi);
+				Cluster_size->push_back( (int) clus->clusterSize() );
 
 			}
 			calc_etcone20 -= coreCone ; calc_etcone30 -= coreCone ; calc_etcone40 -= coreCone ; 
