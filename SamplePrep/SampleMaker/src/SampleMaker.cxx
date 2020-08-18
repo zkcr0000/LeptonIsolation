@@ -260,7 +260,7 @@ int main (int argc, char *argv[]) {
         lep_d0_over_sigd0 = xAOD::TrackingHelpers::d0significance(track_particle);
         lep_z0 = track_particle->z0();
         lep_dz0 = track_particle->z0() - primary_vertex->z();
-        // PLT = accessPromptVar(*lepton);
+        //PLT = accessPromptVar(*lepton);
         PLT = 1.0;
         if (is_electron) process_electron_cones((const xAOD::Electron*)lepton);
         else process_muon_cones((const xAOD::Muon*)lepton);
@@ -289,14 +289,22 @@ int main (int argc, char *argv[]) {
                 nearest_dR = jet_dR;
             }
         }
-
-        if (lep_has_associated_jet) {
+        
+        lep_DL1r = 0.0;
+		if (lep_has_associated_jet) {
             double lep_DL1r_double = 0.0;
-            m_bTagSel_DL1r->getTaggerWeight(*nearest_jet, lep_DL1r_double);
-            lep_DL1r = lep_DL1r_double;
-        }
-        else {
-            lep_DL1r = 0.0;
+			double dl1_pb(-10.0), dl1_pc(-10.0), dl1_pu(-10.0);
+			const xAOD::BTagging* btag = nearest_jet->btagging();
+			
+			btag->pb("DL1r",dl1_pb);
+			btag->pc("DL1r",dl1_pc);
+			btag->pu("DL1r",dl1_pu);
+			
+			bool valid_input = (!std::isnan(pu) && pb>0 && pc>0 && pu>0);
+			if (valid_input){
+            	m_bTagSel_DL1r->getTaggerWeight(*nearest_jet, lep_DL1r_double);
+            	lep_DL1r = lep_DL1r_double;
+			}
         }
 
         //--- Check if lepton passes cuts
