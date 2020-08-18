@@ -300,7 +300,7 @@ int main (int argc, char *argv[]) {
 			btag->pc("DL1r",dl1_pc);
 			btag->pu("DL1r",dl1_pu);
 			
-			bool valid_input = (!std::isnan(pu) && pb>0 && pc>0 && pu>0);
+			bool valid_input = (!std::isnan(dl1_pu) && dl1_pb>0 && dl1_pc>0 && dl1_pu>0);
 			if (valid_input){
             	m_bTagSel_DL1r->getTaggerWeight(*nearest_jet, lep_DL1r_double);
             	lep_DL1r = lep_DL1r_double;
