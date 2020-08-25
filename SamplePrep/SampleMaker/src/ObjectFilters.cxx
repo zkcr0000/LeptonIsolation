@@ -25,12 +25,12 @@ namespace xAOD {
 
 using namespace std;
 
-//static SG::AuxElement::ConstAccessor<char> cacc_lhmedium("DFCommonElectronsLHMedium");
-//static SG::AuxElement::ConstAccessor<char> cacc_lhloos("DFCommonElectronsLHLoose");
-//static SG::AuxElement::ConstAccessor<char> cacc_lhtight("DFCommonElectronLHTight");
-static SG::AuxElement::ConstAccessor<char> cacc_lhmedium("LHMedium");
-static SG::AuxElement::ConstAccessor<char> cacc_lhloos("LHLoose");
-static SG::AuxElement::ConstAccessor<char> cacc_lhtight("LHTight");
+static SG::AuxElement::ConstAccessor<char> cacc_lhmedium("DFCommonElectronsLHMedium");
+static SG::AuxElement::ConstAccessor<char> cacc_lhloos("DFCommonElectronsLHLoose");
+static SG::AuxElement::ConstAccessor<char> cacc_lhtight("DFCommonElectronLHTight");
+//static SG::AuxElement::ConstAccessor<char> cacc_lhmedium("LHMedium");
+//static SG::AuxElement::ConstAccessor<char> cacc_lhloos("LHLoose");
+//static SG::AuxElement::ConstAccessor<char> cacc_lhtight("LHTight");
 
 class ObjectFilters {
     public:
