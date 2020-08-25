@@ -193,7 +193,7 @@ int main (int argc, char *argv[]) {
     };
     //TODO: uncomment if needed. 
     //--- Accessors
-    //SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
+    SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
 
     std::string FlvTagCutDefinitionsFileName = "/eos/atlas/atlascerngroupdisk/asg-calib/xAODBTaggingEfficiency/13TeV/2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
     std::string WP = "FixedCutBEff_77";
@@ -260,8 +260,8 @@ int main (int argc, char *argv[]) {
         lep_d0_over_sigd0 = xAOD::TrackingHelpers::d0significance(track_particle);
         lep_z0 = track_particle->z0();
         lep_dz0 = track_particle->z0() - primary_vertex->z();
-        //PLT = accessPromptVar(*lepton);
-        PLT = 1.0;
+        PLT = accessPromptVar(*lepton);
+        //PLT = 1.0;
         if (is_electron) process_electron_cones((const xAOD::Electron*)lepton);
         else process_muon_cones((const xAOD::Muon*)lepton);
 
@@ -295,11 +295,11 @@ int main (int argc, char *argv[]) {
             double lep_DL1r_double = 0.0;
 			double dl1_pb(-10.0), dl1_pc(-10.0), dl1_pu(-10.0);
 			const xAOD::BTagging* btag = nearest_jet->btagging();
-			
-			btag->pb("DL1r",dl1_pb);
-			btag->pc("DL1r",dl1_pc);
-			btag->pu("DL1r",dl1_pu);
-			
+			if (btag != NULL){
+				btag->pb("DL1r",dl1_pb);
+				btag->pc("DL1r",dl1_pc);
+				btag->pu("DL1r",dl1_pu);
+			}
 			bool valid_input = (!std::isnan(dl1_pu) && dl1_pb>0 && dl1_pc>0 && dl1_pu>0);
 			if (valid_input){
             	m_bTagSel_DL1r->getTaggerWeight(*nearest_jet, lep_DL1r_double);
