@@ -367,7 +367,8 @@ int main (int argc, char *argv[]) {
  			
 			float areacore = 5*7*0.025*2 *M_PI/256;
 			xAOD::Egamma* electron = (xAOD::Egamma*) lepton;
-            const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster(); 
+            const xAOD::CaloCluster *egclus = ((const xAOD::Egamma*) lepton)->caloCluster();
+			if (egclus==NULL) return false;
 			float eta = egclus->eta();
 			double rho = (fabs(eta) < 1.5) ? rho_central:rho_forward;
 			
