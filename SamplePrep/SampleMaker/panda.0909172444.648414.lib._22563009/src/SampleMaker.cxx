@@ -26,7 +26,6 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 
 
-#include <PathResolver/PathResolver.h>
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPrimitives/IsolationConeSize.h"
@@ -210,7 +209,7 @@ int main (int argc, char *argv[]) {
     //SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
 
     //std::string FlvTagCutDefinitionsFileName = "/eos/atlas/atlascerngroupdisk/asg-calib/xAODBTaggingEfficiency/13TeV/2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
-    std::string FlvTagCutDefinitionsFileName = PathResolverFindCalibFile("/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2020-03-11_v3.root");
+    std::string FlvTagCutDefinitionsFileName = "./2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
     std::string WP = "FixedCutBEff_77";
     BTaggingSelectionTool *m_bTagSel_DL1r = new BTaggingSelectionTool("BTagSel_DL1r");
     m_bTagSel_DL1r->setProperty( "FlvTagCutDefinitionsFileName", FlvTagCutDefinitionsFileName);

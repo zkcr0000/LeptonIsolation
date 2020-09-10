@@ -17,12 +17,10 @@ JOB_TAG=$(date +%F-%H-%M)
 
 lsetup panda
 
-DSID=$(sed -r 's/[^\.]*\.([0-9]{6,8})\..*/\1/' <<< ${IN_DS})
 OUT_DS=user.${GRID_NAME}.RNN.${JOB_TAG}
-prun --exec "./build/x*/bin/SampleMaker %IN %IN2 %IN3"\
+prun --exec "./build/x*/bin/SampleMaker %IN"\
     --athenaTag=AnalysisBase,21.2.97\
-	--secondaryDSs IN2:2:mc16_13TeV.395095.MGPy8EG_A14N23LO_SM_N2C1m_255_250_2L2MET75_MadSpin.recon.AOD.e7035_a875_r10724/,IN3:2:mc16_13TeV.395095.MGPy8EG_A14N23LO_SM_N2C1m_255_250_2L2MET75_MadSpin.recon.AOD.e7035_a875_r10724/\
-    --inDS mc16_13TeV.395033.MGPy8EG_A14N23LO_SM_N2C1p_255_250_2L2MET75_MadSpin.recon.AOD.e7035_a875_r10724/\
+    --inDS mc16_13TeV.395033.MGPy8EG_A14N23LO_SM_N2C1p_255_250_2L2MET75_MadSpin.recon.AOD.e7035_a875_r10724\
 	--outputs output.root\
 	--outDS ${OUT_DS}\
     --noEmail > ${OUT_DS}.log 2>&1

@@ -1,0 +1,1 @@
+source $AtlasSetup/scripts/asetup.sh AnalysisBase,21.2.97,notest --platform x86_64-centos7-gcc8-opt --makeflags='$MAKEFLAGS'
