@@ -12,3 +12,4 @@ SamplePrep/.asetup.save
 */runs
 /Training/runs
 MiscScripts/Tests/test.onnx
+SamplePrep/SampleMaker/build/*
