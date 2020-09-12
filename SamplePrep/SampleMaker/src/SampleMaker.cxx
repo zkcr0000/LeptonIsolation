@@ -24,7 +24,7 @@
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "CaloGeoHelpers/CaloSampling.h"
-
+#include <PathResolver/PathResolver.h>
 
 
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -45,8 +45,21 @@ using namespace std;
 
 int main (int argc, char *argv[]) {
     //--- Open input files - all argv after argv[0] are file names
-    std::vector<std::string> inputFileNames;
-    for (int i=1; i < argc; i++) inputFileNames.push_back(argv[i]);
+        std::vector<std::string> inputFileNames;
+    for (int i=1; i < argc; i++){
+		std::string tmp="";
+		std::string arg = argv[i];
+		for (const char& c:arg){
+			if (c==',') {
+				inputFileNames.push_back(tmp);
+				std::cout<<tmp<<std::endl;
+				tmp = "";
+				continue;
+			}
+			tmp = tmp+c;
+		}
+		inputFileNames.push_back(tmp);
+	}
 
     cout << "\nReading input files" << endl;
     TChain* inputFileChain = new TChain("CollectionTree");
@@ -195,7 +208,7 @@ int main (int argc, char *argv[]) {
     //--- Accessors
     SG::AuxElement::ConstAccessor<float> accessPromptVar("PromptLeptonVeto");
 
-    std::string FlvTagCutDefinitionsFileName = "/eos/atlas/atlascerngroupdisk/asg-calib/xAODBTaggingEfficiency/13TeV/2019-21-13TeV-MC16-CDI-2019-10-07_v1.root";
+    std::string FlvTagCutDefinitionsFileName =PathResolverFindCalibFile("/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2020-03-11_v3.root");;
     std::string WP = "FixedCutBEff_77";
     BTaggingSelectionTool *m_bTagSel_DL1r = new BTaggingSelectionTool("BTagSel_DL1r");
     m_bTagSel_DL1r->setProperty( "FlvTagCutDefinitionsFileName", FlvTagCutDefinitionsFileName);

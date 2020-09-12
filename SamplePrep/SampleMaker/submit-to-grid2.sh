@@ -1,3 +1,6 @@
+s script:
+# source submit-to-grid.sh
+
 source setup_env.sh
 source build/x86_64-centos7-gcc8-opt/setup.sh
 
@@ -12,10 +15,11 @@ JOB_TAG=$(date +%F-%H-%M)
 
 lsetup panda
 
-OUT_DS=user.kazheng.RNN.${JOB_TAG}
+OUT_DS=user.${GRID_NAME}.RNN.${JOB_TAG}
 prun --exec "./build/x*/bin/SampleMaker %IN"\
     --athenaTag=AnalysisBase,21.2.97\
-    --inDS mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_MUON5.e6337_s3126_r10724_p3980\  
-	--outputs output.root\
+    --inDS mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_MUON5.e6337_s3126_r10724_p3980\
 	--outDS ${OUT_DS}\
+	--outputs output.root\
+	--nFiles 200\
     --noEmail > ${OUT_DS}.log 2>&1
