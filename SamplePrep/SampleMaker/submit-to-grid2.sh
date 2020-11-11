@@ -21,5 +21,5 @@ prun --exec "./build/x*/bin/SampleMaker %IN"\
     --inDS mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_MUON5.e6337_s3126_r10724_p3980\
 	--outDS ${OUT_DS}\
 	--outputs output.root\
-	--nFiles 200\
+	--nFiles 5000\
     --noEmail > ${OUT_DS}.log 2>&1

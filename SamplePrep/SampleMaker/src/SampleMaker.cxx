@@ -41,6 +41,10 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
 
+#include "IsolationSelection/IsolationLowPtPLVTool.h"
+#include "xAODBase/ObjectType.h"
+#include "xAODBase/IParticleHelpers.h"
+
 using namespace std;
 
 int main (int argc, char *argv[]) {
@@ -68,7 +72,11 @@ int main (int argc, char *argv[]) {
         cout << "Opened file: " << inputFileNames[iFile].c_str() << endl;
         inputFileChain->Add(inputFileNames[iFile].c_str());
     }
-
+    //-- TOOLS FOR LowPtPLV
+    CP::IsolationLowPtPLVTool* isoLowPtPLVTool = new CP::IsolationLowPtPLVTool("LowPtPLVToolName");
+    isoLowPtPLVTool->initialize();
+    static const SG::AuxElement::ConstAccessor<float>  s_acc_PLV("LowPtPLV"); 
+	 	
     //--- Whether or not to filter out a lepton's own tracks
     bool filter_own_tracks = true;
 
@@ -85,7 +93,7 @@ int main (int argc, char *argv[]) {
     int entry_n; unnormedTree->Branch("event_n", &entry_n, "event_n/I");
     int pdgID; unnormedTree->Branch("pdgID", &pdgID, "pdgID/I");
     int truth_type; unnormedTree->Branch("truth_type", &truth_type, "truth_type/I");
-
+     
     float ptcone20; unnormedTree->Branch("baseline_ptcone20", &ptcone20, "baseline_ptcone20/F");
     float ptcone30; unnormedTree->Branch("baseline_ptcone30", &ptcone30, "baseline_ptcone30/F");
     float ptcone40; unnormedTree->Branch("baseline_ptcone40", &ptcone40, "baseline_ptcone40/F");
@@ -107,8 +115,8 @@ int main (int argc, char *argv[]) {
     float topoetcone40_over_pt; unnormedTree->Branch("baseline_topoetcone40_over_pt", &topoetcone40_over_pt, "baseline_topoetcone40_over_pt/F");
     float eflowcone20_over_pt; unnormedTree->Branch("baseline_eflowcone20_over_pt", &eflowcone20_over_pt, "baseline_eflowcone20_over_pt/F");
     float PLT; unnormedTree->Branch("baseline_PLT", &PLT, "baseline_PLT/F");
-
-	float calc_ptcone20; unnormedTree->Branch("calc_ptcone20", &calc_ptcone20, "calc_ptcone20/F");
+    float lowPtPLT; unnormedTree->Branch("lowPtPLT", &lowPtPLT, "lowPtPLT/F");
+    float calc_ptcone20; unnormedTree->Branch("calc_ptcone20", &calc_ptcone20, "calc_ptcone20/F");
     float calc_ptcone30; unnormedTree->Branch("calc_ptcone30", &calc_ptcone30, "calc_ptcone30/F");
     float calc_ptcone40; unnormedTree->Branch("calc_ptcone40", &calc_ptcone40, "calc_ptcone40/F");
     float calc_ptvarcone20; unnormedTree->Branch("calc_ptvarcone20", &calc_ptvarcone20, "calc_ptvarcone20/F");
@@ -266,6 +274,9 @@ int main (int argc, char *argv[]) {
 		
         //--- Retrieve all relevant lepton variables
         lep_pT = lepton->pt();
+        if(lep_pT > 10*1000){
+	    return false;
+        }
         lep_eta = lepton->eta();
         lep_theta = 2 * atan(exp(-lep_eta));
         lep_phi = lepton->phi();
@@ -340,7 +351,11 @@ int main (int argc, char *argv[]) {
             set<const xAOD::TrackParticle*> muon_tracks {own_track};
             return muon_tracks;
         };
-
+        // Get PLV
+        isoLowPtPLVTool->augmentPLV(*lepton);
+        //lowPtPLT = lepton->auxdata("LowPtPLV");
+        lowPtPLT = s_acc_PLV(*lepton);
+        
         trk_lep_dR->clear(); trk_pT->clear(); trk_eta->clear(); trk_phi->clear();
         trk_d0->clear(); trk_z0->clear(); trk_charge->clear(); trk_chi2->clear();
         trk_lep_dEta->clear(); trk_lep_dPhi->clear(); trk_lep_dD0->clear(); trk_lep_dZ0->clear();
@@ -393,7 +408,7 @@ int main (int argc, char *argv[]) {
 			electron->isolationCaloCorrection (pt_corr20, xAOD::Iso::topoetcone20, xAOD::Iso::ptCorrection) ; 
 			electron->isolationCaloCorrection (pt_corr30, xAOD::Iso::topoetcone30, xAOD::Iso::ptCorrection) ; 
 			electron->isolationCaloCorrection (pt_corr40, xAOD::Iso::topoetcone40, xAOD::Iso::ptCorrection) ; 
-
+                        if (electron->caloCluster() == NULL) return false;
 			float trk_phi = electron->caloCluster()->phi();
 			float trk_eta = electron->caloCluster()->eta();
 
@@ -480,6 +495,7 @@ int main (int argc, char *argv[]) {
 			float trk_eta = own_track->eta();
 
 			auto cluster = muon->cluster();
+	    if (cluster == NULL) return false;
             float etaT = 0, phiT = 0, dphiT = 0;
             int nSample = 0;
             for (unsigned int i = 0; i < CaloSampling::Unknown; i++) // dangerous?
@@ -664,7 +680,7 @@ int main (int argc, char *argv[]) {
         }
         update_cutflow(new_filtered_electrons, new_filtered_muons, 2);
 
-        //--- Additional cutflow step for comparison - what does a ptvarcone40/lep_pT cut identify as isolated?
+        //--- Additional cutflIsolationLowPtow step for comparison - what does a ptvarcone40/lep_pT cut identify as isolated?
         vector<pair<const xAOD::Electron*, int>> isolated_filtered_electrons;
         vector<pair<const xAOD::Muon*, int>> isolated_filtered_muons;
         float temp_ptvarcone40;

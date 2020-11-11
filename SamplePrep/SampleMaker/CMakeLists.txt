@@ -52,6 +52,7 @@ set(_common
   xAODBTaggingEfficiencyLib
   xAODJet
   xAODEventShape
+  IsolationSelectionLib
 )
 
 atlas_depends_on_subdirs(
