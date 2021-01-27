@@ -25,7 +25,14 @@
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include <PathResolver/PathResolver.h>
-
+#include "SUSYTools/SUSYObjDef_xAOD.h"
+#include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/TStore.h"
+#ifdef ROOTCORE
+#include "xAODRootAccess/TEvent.h"
+#else
+#include "POOLRootAccess/TEvent.h"
+#endif // ROOTCORE
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPrimitives/IsolationConeSize.h"
@@ -85,7 +92,12 @@ int main (int argc, char *argv[]) {
     RETURN_CHECK(ALG, xAOD::Init());
     xAOD::TEvent event(xAOD::TEvent::kClassAccess);
     RETURN_CHECK(ALG, event.readFrom(inputFileChain));
-
+    
+    //--- Create Overlap Removal Tool
+    std::string config_file = "./SUSYTools_Default.conf"; 
+    ST::SUSYObjDef_xAOD objTool("SUSYObjDef_xAOD"); 
+    objTool.setProperty("ConfigFile", config_file);
+    //xAOD::TStore store;    
     //--- Create branches in unnormalized tree
     TFile outputFile("output.root", "recreate");
     TTree* unnormedTree = new TTree("UnnormedTree", "unnormalized tree");
@@ -625,6 +637,7 @@ int main (int argc, char *argv[]) {
         const xAOD::MuonContainer *muons;
         const xAOD::CaloClusterContainer *calo_clusters;
         const xAOD::JetContainer *jets;
+	const xAOD::PhotonContainer *photons;
 		const xAOD::EventShape_v1* m_tpEDCentral ;
 		const xAOD::EventShape_v1* m_tpEDForward ;
 
@@ -635,6 +648,7 @@ int main (int argc, char *argv[]) {
         RETURN_CHECK(ALG, event.retrieve(muons, "Muons"));
         RETURN_CHECK(ALG, event.retrieve(calo_clusters, "CaloCalTopoClusters"));
         RETURN_CHECK(ALG, event.retrieve(jets, "AntiKt4EMTopoJets"));
+        RETURN_CHECK(ALG, event.retrieve(photons, "Photons"));
 		RETURN_CHECK(ALG, event.retrieve(m_tpEDCentral, "TopoClusterIsoCentralEventShape") );
 		RETURN_CHECK(ALG, event.retrieve(m_tpEDForward, "TopoClusterIsoForwardEventShape") );
 
@@ -645,6 +659,10 @@ int main (int argc, char *argv[]) {
 		const xAOD::Vertex *primary_vertex = primary_vertices->at(0);
 		electron_number += electrons->size();
 		//for (const xAOD::Electron* electron: *electrons) { ++electron_number;}
+	//--- Overlap removal
+	if(electrons == NULL || muons == NULL || jets == NULL || photons == NULL){
+        	objTool.OverlapRemoval(electrons, muons, jets, photons);
+	}
 		
         //--- Filter objects
         vector<const xAOD::TrackParticle*> filtered_tracks = object_filters.filter_tracks(tracks, primary_vertex);
