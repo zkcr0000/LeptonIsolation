@@ -97,7 +97,7 @@ int main (int argc, char *argv[]) {
     std::string config_file = "./SUSYTools_Default.conf"; 
     ST::SUSYObjDef_xAOD objTool("SUSYObjDef_xAOD"); 
     objTool.setProperty("ConfigFile", config_file);
-    xAOD::TStore store;    
+    //xAOD::TStore store;    
     //--- Create branches in unnormalized tree
     TFile outputFile("output.root", "recreate");
     TTree* unnormedTree = new TTree("UnnormedTree", "unnormalized tree");
@@ -661,7 +661,7 @@ int main (int argc, char *argv[]) {
 		//for (const xAOD::Electron* electron: *electrons) { ++electron_number;}
 	//--- Overlap removal
 	if(electrons != NULL && muons != NULL && jets != NULL && photons != NULL){
-		objTool.OverlapRemoval(electrons, muons, jets, photons);
+        	objTool.OverlapRemoval(electrons, muons, jets, photons);
 	}
 		
         //--- Filter objects
